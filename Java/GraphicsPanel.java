@@ -28,9 +28,8 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 	
 	private int score; // score for how many meteors destroyed
 	private int moves;
-	private int time; // main running bTimer
+	private int scale; 
 	private boolean blockSelected;
-	private boolean dirSelected;
 	private int[] direction;
 	private int[] sBlock;
 	private PracticeBlock[][] board;
@@ -43,18 +42,17 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 	
 	
 	public GraphicsPanel(){
-		background = new DesertBackground();	
-		time = 0;
+		background = new DesertBackground();
 		score = 0;
 		moves = 0;
 		blockSelected = false;
-		dirSelected = false;
 		direction = new int[2];
 		sBlock = new int[2];
 		sBlock[0] = -1;
 		sBlock[1] = -1;
 		board = new PracticeBlock[5][5];
 		// initialize initial board here
+		scale = 1; // size of board / PracticeBlocks
 		
 		// This line of code sets the dimension of the panel equal to the dimensions
 		// of the background image.
@@ -115,60 +113,82 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 	// description: This method is called by the clocklistener every 5 milliseconds.  You should update the coordinates
 	//				of one of your characters in this method so that it moves as bTime changes.  After you update the
 	//				coordinates you should repaint the panel.
-	public void clock(){
-		time += 1;
-		// update logic
-		if (dirSelected) {
-			check(sBlock[0], sBlock[1], direction);
-			board[sBlock[0]][sBlock[1]].setSelected(false);
-			
-			// move everything
-			// need a while function here that directs the block to move until it reaches its final destination.
-			// could trigger this in the check function, but need it to occur over time
-			// but then could have the collision function be a move to endRow & endCol + collision during final movement.
+	public void clock(boolean collide){
+		if (!collide) {
 			board[sBlock[0]][sBlock[1]].move(direction);
-			
-			dirSelected = false;
-			blockSelected = false;
-			sBlock[0] = -1;
-			sBlock[1] = -1;
-			direction[0] = 0;
-			direction[1] = 1;
+		}
+		else { // collision!!!
+			// collision one step at a time
 		}
 		
 		this.repaint();
 	}
 	
+	public int sumArrayAbs(int[] arr) {
+		int sum = 0;
+		for (int i : arr) {
+			sum += Math.abs(i);
+		}
+		return sum;
+	}
 	
-	
-	public void check(int row, int col, int[] direct) {
-		// end positions, temporary
-		int endR = row;
-		int endC = col;
+	public void animate() {
+		// set currently selected block = false
+		board[sBlock[0]][sBlock[1]].setSelected(false);
+		
+		// ending position
+		int[] end = new int[2];
+		end[0] = sBlock[0];
+		end[1] = sBlock[1];
 		
 		// checks if next position exists (is not a wall) and if it is empty.
-		while ((endR + direct[0] < board.length && endC + direct[1] < board[endC].length) && (board[endR + direct[0]][endC + direct[1]] == null)) {
+		while ((end[0] + direction[0] < board.length && end[1] + direction[1] < board[end[1]].length) && (board[end[0] + direction[0]][end[1] + direction[1]] == null)) {
 			// if so, updates new end position.
-			endR += direct[0];
-			endC += direct[1];
+			end[0] += direction[0];
+			end[1] += direction[1];
 		}
 		// checks for collision, and collides if so
-		if (board[endR + direct[0]][endC + direct[1]] == board[row][col]) {
-			score += board[row][col].getValue() * 2;
-			board[endR + direct[0]][endC + direct[1]] = board[row][col];
-			board[endR + direct[0]][endC + direct[1]].doubleValue();
-			board[row][col] = null;
+		if (board[end[0] + direction[0]][end[1] + direction[1]] == board[sBlock[0]][sBlock[1]]) {
 			// need collision animation
+			// happens before logic so that sBlock is right.
+			int t = 0;
+			while (t < 20 * scale * sumArrayAbs(end)) { // based on scale
+				clock(false);
+			}
+			while (t < 20 * scale *(sumArrayAbs(end)+1)) { // based on scale
+				clock(true);
+			}
+			
+			score += board[sBlock[0]][sBlock[1]].getValue() * 2;
+			board[end[0] + direction[0]][end[1] + direction[1]] = board[sBlock[0]][sBlock[1]];
+			board[end[0] + direction[0]][end[1] + direction[1]].doubleValue();
+			board[sBlock[0]][sBlock[1]] = null;
+			
+			
 		}
 		// moves the block to its new position.
 		else {
-			board[endR][endC] = board[row][col];
-			board[row][col] = null;
 			// need moving animation
+			// happens before logic so that sBlock is right.
+			int t = 0;
+			while (t < 20 * scale * sumArrayAbs(end)) { // based on scale
+				clock(false);
+			}
+			
+			board[end[0]][end[1]] = board[sBlock[0]][sBlock[1]];
+			board[sBlock[0]][sBlock[1]] = null;
 		}
 		
 		// adding random new block
+		
+		
+		blockSelected = false;
+		sBlock[0] = -1;
+		sBlock[1] = -1;
+		direction[0] = 0;
+		direction[1] = 0;
 	}
+	
 	
 	// method: keyPressed()
 	// description: This method is called when a key is pressed. You can determine which key is pressed using the
@@ -190,7 +210,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 	        else if (keyCode == KeyEvent.VK_RIGHT) {
 	        	direction[1] = 1;
 	        }
-		dirSelected = true;
+		animate();
         }
 	}
 	@Override public void keyTyped(KeyEvent e) {}
