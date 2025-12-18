@@ -30,9 +30,10 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 	private int moves;
 	private int scale; 
 	private boolean blockSelected;
+	private boolean collide;
 	private int[] direction;
 	private int[] sBlock;
-	private PracticeBlock[][] board;
+	private Block[][] board;
 	
 	private Background background;	// background
 	
@@ -43,16 +44,20 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 	
 	public GraphicsPanel(){
 		background = new DesertBackground();
+		// establishes the beginning.
 		score = 0;
 		moves = 0;
 		blockSelected = false;
+		collide = false;
 		direction = new int[2];
 		sBlock = new int[2];
 		sBlock[0] = -1;
 		sBlock[1] = -1;
-		board = new PracticeBlock[5][5];
-		// initialize initial board here
-		scale = 1; // size of board / PracticeBlocks
+		board = new Block[4][4];
+		// initialize initial board here -> 2 random blocks
+		addRandomBlock();
+		addRandomBlock();
+		scale = 1; // size of board / Blocks
 		
 		// This line of code sets the dimension of the panel equal to the dimensions
 		// of the background image.
@@ -62,9 +67,10 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 													 	 // action performed method every 5 milliseconds once the
 													 	 // bTimer is started. You can change how frequently this
 													 	 // method is called by changing the first parameter.
-		Timer.start();
+		//Timer.start();
 		this.setFocusable(true);					     // for keylistener
 		this.addKeyListener(this);
+		this.addMouseListener(this);
 	
 	    
 	    gameOver = false;
@@ -89,22 +95,20 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 		// prints the score of the player (based on how many meteors they shoot)
 		g.drawString("Score: " + score, 20, 55);
 		
-		//DRAW HEALTH BAR
-		//border around
-		g2.setColor(Color.BLACK);
-		// the health bar
-		g2.fillRect(895,65,210,30);
-		// the starvation bar
-		g2.fillRect(895,135,210,30);
 		
-		// Creates bar background for when levels decrease
-		g2.setColor(Color.GRAY);
-		// for the health bar
-		g2.fillRect(900, 70, 200, 20);
-		// for the starvation bar
-		g2.fillRect(900, 140, 200, 20);
-		
-		
+		// draw all the blocks
+		for (int r = 0; r < board.length; r++) {
+			for (int c = 0; c < board[r].length; c++) {
+				if (board[r][c] != null && board[r][c].getSelected()) {
+					g.setColor(Color.YELLOW);
+					Rectangle bounds = board[r][c].getBounds();
+					g.drawRect((int) bounds.getX() - 2, (int) bounds.getY() - 2, (int) bounds.getWidth() + 4, (int) bounds.getHeight() + 4);
+					g.setColor(Color.BLACK);
+					board[r][c].draw(g2, this);
+				}
+				else if (board[r][c] != null) board[r][c].draw(g2, this);
+			}
+		}
 		
 
 	}
@@ -113,7 +117,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 	// description: This method is called by the clocklistener every 5 milliseconds.  You should update the coordinates
 	//				of one of your characters in this method so that it moves as bTime changes.  After you update the
 	//				coordinates you should repaint the panel.
-	public void clock(boolean collide){
+	public void clock(){
 		if (!collide) {
 			board[sBlock[0]][sBlock[1]].move(direction);
 		}
@@ -134,7 +138,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 	
 	public void animate() {
 		// set currently selected block = false
-		board[sBlock[0]][sBlock[1]].setSelected(false);
+		if (sBlock[0] != -1) board[sBlock[0]][sBlock[1]].setSelected(false);
 		
 		// ending position
 		int[] end = new int[2];
@@ -142,7 +146,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 		end[1] = sBlock[1];
 		
 		// checks if next position exists (is not a wall) and if it is empty.
-		while ((end[0] + direction[0] < board.length && end[1] + direction[1] < board[end[1]].length) && (board[end[0] + direction[0]][end[1] + direction[1]] == null)) {
+		while ((end[0] + direction[0] < board.length -1 && end[1] + direction[1] < board[end[1]].length -1) && (end[0] + direction[0] > 0 && end[1] + direction[1] > 0) && (board[end[0] + direction[0]][end[1] + direction[1]] == null)) {
 			// if so, updates new end position.
 			end[0] += direction[0];
 			end[1] += direction[1];
@@ -152,12 +156,16 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 			// need collision animation
 			// happens before logic so that sBlock is right.
 			int t = 0;
+			Timer.start();
 			while (t < 20 * scale * sumArrayAbs(end)) { // based on scale
-				clock(false);
+				t++;
 			}
 			while (t < 20 * scale *(sumArrayAbs(end)+1)) { // based on scale
-				clock(true);
+				collide = true;
+				clock();
+				collide = false;
 			}
+			Timer.stop();
 			
 			score += board[sBlock[0]][sBlock[1]].getValue() * 2;
 			board[end[0] + direction[0]][end[1] + direction[1]] = board[sBlock[0]][sBlock[1]];
@@ -171,16 +179,17 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 			// need moving animation
 			// happens before logic so that sBlock is right.
 			int t = 0;
+			Timer.start();
 			while (t < 20 * scale * sumArrayAbs(end)) { // based on scale
-				clock(false);
+				t++;
 			}
-			
+			Timer.stop();
 			board[end[0]][end[1]] = board[sBlock[0]][sBlock[1]];
 			board[sBlock[0]][sBlock[1]] = null;
 		}
 		
 		// adding random new block
-		
+		addRandomBlock();
 		
 		blockSelected = false;
 		sBlock[0] = -1;
@@ -189,6 +198,26 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 		direction[1] = 0;
 	}
 	
+	public void addRandomBlock() {
+		// create 2d ArrayList of empty spaces on board
+		ArrayList<int[]> empty = new ArrayList<>();
+		
+		// adds empty spaces to ArrayList
+		for (int r = 0; r < board.length; r++) {
+			for (int c = 0; c < board[r].length; c++) {
+				if (board[r][c] == null) {
+					int[] e = {r, c};
+					empty.add(e);
+				}
+			}
+		}
+		
+		int[] add = empty.get((int) (Math.random() * empty.size()));
+		int value = 0;
+		if (Math.random() >= 0.9) value = 4;
+		else value = 2;
+		board[add[0]][add[1]] = new Block(14 + add[1] * 122, 14 + add[0] * 122, value, 1);
+	}
 	
 	// method: keyPressed()
 	// description: This method is called when a key is pressed. You can determine which key is pressed using the
@@ -200,17 +229,21 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
         if (blockSelected) {
 			if (keyCode == KeyEvent.VK_UP) {
 	        	direction[0] = -1;
+				System.out.println("up");
 	        }
 	        else if (keyCode == KeyEvent.VK_DOWN) {
 	        	direction[0] = 1;
+				System.out.println("down");
 	        }
 	        else if (keyCode == KeyEvent.VK_LEFT) {
 	        	direction[1] = -1;
+				System.out.println("left");
 	        }
 	        else if (keyCode == KeyEvent.VK_RIGHT) {
 	        	direction[1] = 1;
+				System.out.println("right");
 	        }
-		animate();
+			animate();
         }
 	}
 	@Override public void keyTyped(KeyEvent e) {}
@@ -224,13 +257,35 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
         System.out.println("Mouse clicked at: (" + x + ", " + y + ")");
         
         // designates which block you are moving
+        // set based on scale
+        //int row = (int) (y * 5 / (scale * 100));
+        //int col = (int) (x * 5 / (scale * 100));
+        
+        int row = -1;
+        int col = -1;
+        for (int r = 0; r < board.length; r++) {
+        	for (int c = 0; c < board[r].length; c++) {
+        		if (board[r][c] != null) {
+	        		Rectangle bounds = board[r][c].getBounds();
+	        		if (bounds.contains(x,y)) {
+	        			board[r][c].setSelected(true);
+	        			System.out.println(r + ", " + c);
+	        			row = r;
+	        			col = c;
+	        		}
+        		}
+        	}
+        }
+        
+        //board[row][col].setSelected(true);
         // setSelected block to true
         
-        if (blockSelected) { // if another block has been selected
-        	// unselect previous block using setSelected
+        if (blockSelected && sBlock[0] != -1) { // if another block has been selected
+        	board[sBlock[0]][sBlock[1]].setSelected(false);
         }
-        sBlock[0] = y; // corresponding to rows
-        sBlock[1] = x; // corresponding to columns
+        sBlock[0] = row; // corresponding to rows
+        sBlock[1] = col; // corresponding to columns
+        System.out.println(sBlock[0] + ", " + sBlock[1]);
         blockSelected = true;
         repaint(); // Request a repaint to update the graphics
     }
