@@ -143,6 +143,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 							end += direction[0]; // moves to empty spaces
 						}
 						
+						// updates block location here
 						if (end + direction[0] < board.length 
 								&& end + direction[0] >= 0 
 								&& board[end + direction[0]][c].getValue() == board[start[0]][c].getValue()
@@ -151,11 +152,17 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 							// need animation here
 							board[end + direction[0]][c].doubleValue();
 							board[end + direction[0]][c].setCombined(true);
+							// update graphics location
+							board[end + direction[0]][c].setY(14 + 122 * (end + direction[0]));
+							
 							score += board[end + direction[0]][c].getValue();
 							board[start[0]][c] = null;
 						} else {
 							// need animation here
 							board[end][c] = board[start[0]][c];
+							// update graphics location
+							board[end][c].setY(14 + 122 * end);
+							
 							board[start[0]][c] = null;
 						}
 					}
@@ -171,6 +178,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 							end += direction[1]; // moves to empty space
 						}
 						
+						// updates block location here
 						if (end + direction[1] < board[r].length 
 								&& end + direction[1] >= 0 
 								&& board[r][end + direction[1]].getValue() == board[r][start[1]].getValue() 
@@ -179,10 +187,17 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 							// need animation here
 							board[r][end + direction[1]].doubleValue();
 							board[r][end + direction[1]].setCombined(true);
+							// update graphics location
+							board[r][end + direction[1]].setX(14 + 122 * (end + direction[1]));
+							
+							score += board[r][end + direction[1]].getValue();
 							board[r][start[1]] = null;
 						} else {
 							// need animation here
 							board[r][end] = board[r][start[1]];
+							// update graphics location
+							board[r][end].setX(14 + 122 * end);
+							
 							board[r][start[1]] = null;
 						}
 					}
