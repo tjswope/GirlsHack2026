@@ -23,16 +23,14 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
+public class GraphicsPanel extends JPanel implements KeyListener{
 	private Timer Timer;					// The bTimer is used to move objects at a consistent bTime interval.
 	
 	private int score; // score for how many meteors destroyed
 	private int moves;
 	private int scale; 
-	private boolean blockSelected;
-	private boolean collide;
-	private int[] direction;
-	private int[] sBlock;
+	private int[] direction; // direction that blocks are moving
+	private int[] start; // indicating starting row/column that must move first
 	private Block[][] board;
 	
 	private Background background;	// background
@@ -47,12 +45,8 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 		// establishes the beginning.
 		score = 0;
 		moves = 0;
-		blockSelected = false;
-		collide = false;
 		direction = new int[2];
-		sBlock = new int[2];
-		sBlock[0] = -1;
-		sBlock[1] = -1;
+		start = new int[2];
 		board = new Block[4][4];
 		// initialize initial board here -> 2 random blocks
 		addRandomBlock();
@@ -75,7 +69,6 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 		//Timer.start();
 		this.setFocusable(true);					     // for keylistener
 		this.addKeyListener(this);
-		this.addMouseListener(this);
 	
 	    
 	    gameOver = false;
@@ -104,14 +97,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 		// draw all the blocks
 		for (int r = 0; r < board.length; r++) {
 			for (int c = 0; c < board[r].length; c++) {
-				if (board[r][c] != null && board[r][c].getSelected()) {
-					g.setColor(Color.YELLOW);
-					Rectangle bounds = board[r][c].getBounds();
-					g.drawRect((int) bounds.getX() - 2, (int) bounds.getY() - 2, (int) bounds.getWidth() + 4, (int) bounds.getHeight() + 4);
-					g.setColor(Color.BLACK);
-					board[r][c].draw(g2, this);
-				}
-				else if (board[r][c] != null) board[r][c].draw(g2, this);
+				if (board[r][c] != null) board[r][c].draw(g2, this);
 			}
 		}
 		
@@ -123,13 +109,7 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 	//				of one of your characters in this method so that it moves as bTime changes.  After you update the
 	//				coordinates you should repaint the panel.
 	public void clock(){
-		if (!collide) {
-			board[sBlock[0]][sBlock[1]].move(direction);
-		}
-		else { // collision!!!
-			// collision one step at a time
-		}
-		
+		// step-by-step animation will occur here
 		this.repaint();
 	}
 	
@@ -142,76 +122,94 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 	}
 	
 	public void animate() {
-		// set currently selected block = false
-		if (sBlock[0] != -1) board[sBlock[0]][sBlock[1]].setSelected(false);
+		// start with the second from last row/column depending on direction
+			// see if the blocks there can move in the right direction
+			// or combine, combine = true, score update, image update.
+		// then go to next row/column, then last
 		
-		// ending position
-		int[] end = new int[2];
-		end[0] = sBlock[0];
-		end[1] = sBlock[1];
+		// after loop:
+			// loop through and set combine = false
+			// addRandomBlock()
 		
-		// checks if next position exists (is not a wall) and if it is empty.
-		while ((end[0] + direction[0]) < (board.length -1) 
-				&& (end[1] + direction[1]) < (board[end[1]].length - 1)
-				&& (end[0] + direction[0]) > 0 
-				&& (end[1] + direction[1]) > 0 
-				&& (board[end[0] + direction[0]][end[1] + direction[1]] == null)) {
-			// if so, updates new end position.
-			end[0] += direction[0];
-			end[1] += direction[1];
-		}
-		System.out.println("End: " + end[0] + ", " + end[1]);
-		// checks for collision, and collides if so
-		if (board[end[0] + direction[0]][end[1] + direction[1]] == board[sBlock[0]][sBlock[1]]) {
-			// need collision animation
-			// happens before logic so that sBlock is right.
+		while (sumArrayAbs(start) != 0 && sumArrayAbs(start) != 4) { // has not yet shifted through all the rows/columns
+			if (start[0] != 0 && start[1] == 0) { // moving up/down
+				for (int c = 0; c < board[start[0]].length; c++) { // shifting through the blocks in a row
+					if (board[start[0]][c] != null) { // makes sure not trying to move null space
+						int end = start[0]; // updating what row block is on
+						
+						while (end + direction[0] < board.length 
+								&& end + direction[0] >= 0 
+								&& board[end + direction[0]][c] == null) {
+							end += direction[0]; // moves to empty spaces
+						}
+						
+						if (end + direction[0] < board.length 
+								&& end + direction[0] >= 0 
+								&& board[end + direction[0]][c].getValue() == board[start[0]][c].getValue()
+								&& !board[end + direction[0]][c].getCombined()) { // still block hasn't yet been combined
+							// collision
+							// need animation here
+							board[end + direction[0]][c].doubleValue();
+							board[end + direction[0]][c].setCombined(true);
+							score += board[end + direction[0]][c].getValue();
+							board[start[0]][c] = null;
+						} else {
+							// need animation here
+							board[end][c] = board[start[0]][c];
+							board[start[0]][c] = null;
+						}
+					}
+				}
+			} else if (start[0] == 0 && start[1] != 0) { // moving left/right
+				for (int r = 0; r < board.length; r++) { // shifting through the blocks in a column
+					if (board[r][start[1]] != null) { // makes sure not trying to move null space
+						int end = start[1]; // updating what column block is on
+						
+						while (end + direction[1] < board[r].length 
+								&& end + direction[1] >= 0 
+								&& board[r][end + direction[1]] == null) {
+							end += direction[1]; // moves to empty space
+						}
+						
+						if (end + direction[1] < board[r].length 
+								&& end + direction[1] >= 0 
+								&& board[r][end + direction[1]].getValue() == board[r][start[1]].getValue() 
+								&& !board[r][end + direction[1]].getCombined()) { // still block hasn't yet been combined
+							// collision
+							// need animation here
+							board[r][end + direction[1]].doubleValue();
+							board[r][end + direction[1]].setCombined(true);
+							board[r][start[1]] = null;
+						} else {
+							// need animation here
+							board[r][end] = board[r][start[1]];
+							board[r][start[1]] = null;
+						}
+					}
+				}
+			}
 			
-			//int t = 0;
-			//Timer.start();
-			//while (t < 20 * scale * sumArrayAbs(end)) { // based on scale
-			//	t++;
-			//}
-			//while (t < 20 * scale *(sumArrayAbs(end)+1)) { // based on scale
-			//	collide = true;
-			//	clock();
-			//	collide = false;
-			//}
-			//Timer.stop();
-			
-			score += board[sBlock[0]][sBlock[1]].getValue() * 2;
-			board[end[0] + direction[0]][end[1] + direction[1]] = board[sBlock[0]][sBlock[1]];
-			board[end[0] + direction[0]][end[1] + direction[1]].doubleValue();
-			board[sBlock[0]][sBlock[1]] = null;
-			
-			
-		}
-		// moves the block to its new position.
-		else {
-			// need moving animation
-			// happens before logic so that sBlock is right.
-			
-			//int t = 0;
-			//Timer.start();
-			//while (t < 20 * scale * sumArrayAbs(end)) { // based on scale
-			//	t++;
-			//}
-			//Timer.stop();
-
-			board[end[0]][end[1]] = board[sBlock[0]][sBlock[1]];
-			board[end[0]][end[1]].setY(14 + 122 * end[0]);
-			board[end[0]][end[1]].setX(14 + 122 * (end[1] + end[1]));
-			board[sBlock[0]][sBlock[1]] = null;
+			start[0] -= direction[0]; // moving down/up a row/column
+			start[1] -= direction[1];
 		}
 		
-		// adding random new block
+		// setting all combined values to false for next play.
+		for (int r = 0; r < board.length; r++) {
+			for (int c = 0; c < board[r].length; c++) {
+				if (board[r][c] != null && board[r][c].getCombined()) {
+					board[r][c].setCombined(false);
+				}
+			}
+		}
+		
+		start[0] = 0;
+		start[1] = 0;
+		moves++;
 		addRandomBlock();
 		
-		blockSelected = false;
-		sBlock[0] = -1;
-		sBlock[1] = -1;
-		direction[0] = 0;
-		direction[1] = 0;
-		moves += 1;
+		// in the areas with animation will want the repaint() there. 
+		// Maybe after a full row/column has moved in logic so they all move at once?
+		// Don't know how to make that happen though
 		repaint();
 	}
 	
@@ -259,17 +257,6 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 		}
 	}
     // TEST
-
-    // TEST
-	public void testDirection() {
-		board[sBlock[0]][sBlock[1]].setY(14 + 122 * (sBlock[0] + direction[0]));
-		board[sBlock[0]][sBlock[1]].setX(14 + 122 * (sBlock[1] + direction[1]));
-		board[sBlock[0] + direction[0]][sBlock[1] + direction[1]] = board[sBlock[0]][sBlock[1]];
-		board[sBlock[0]][sBlock[1]] = null;
-		addRandomBlock();
-		repaint();
-	}
-    // TEST
 	
 	// method: keyPressed()
 	// description: This method is called when a key is pressed. You can determine which key is pressed using the
@@ -278,85 +265,34 @@ public class GraphicsPanel extends JPanel implements KeyListener, MouseListener{
 	// parameters: KeyEvent e
 	@Override public void keyPressed(KeyEvent e) {
 		int keyCode = e.getKeyCode();
-        if (blockSelected) {
-			if (keyCode == KeyEvent.VK_UP) {
-	        	direction[0] = -1;
-				System.out.println("up");
-	        }
-	        else if (keyCode == KeyEvent.VK_DOWN) {
-	        	direction[0] = 1;
-				System.out.println("down");
-	        }
-	        else if (keyCode == KeyEvent.VK_LEFT) {
-	        	direction[1] = -1;
-				System.out.println("left");
-	        }
-	        else if (keyCode == KeyEvent.VK_RIGHT) {
-	        	direction[1] = 1;
-				System.out.println("right");
-	        }
-			
-			animate();
-			// TEST
-			System.out.println("Direction: " + direction[0] + ", " + direction[1]);
-			//testDirection();
-			printBoard();
-			// TEST
+		if (keyCode == KeyEvent.VK_UP) {
+        	direction[0] = -1;
+        	start[0] = 1;
+			System.out.println("up");
         }
+        else if (keyCode == KeyEvent.VK_DOWN) {
+        	direction[0] = 1;
+        	start[0] = 2;
+			System.out.println("down");
+        }
+        else if (keyCode == KeyEvent.VK_LEFT) {
+        	direction[1] = -1;
+        	start[1] = 1;
+			System.out.println("left");
+        }
+        else if (keyCode == KeyEvent.VK_RIGHT) {
+        	direction[1] = 1;
+        	start[1] = 2;
+			System.out.println("right");
+        }
+		
+		animate();
+		// TEST
+		System.out.println("Direction: " + direction[0] + ", " + direction[1]);
+		//testDirection();
+		printBoard();
+		// TEST
 	}
 	@Override public void keyTyped(KeyEvent e) {}
 	@Override public void keyReleased(KeyEvent e) {}
-	
-	@Override
-    public void mouseClicked(MouseEvent e) {
-        // Code to execute when mouse is clicked
-        int x = e.getX(); // Get x-coordinate of click
-        int y = e.getY(); // Get y-coordinate of click
-        System.out.println("Mouse clicked at: (" + x + ", " + y + ")");
-        
-        // designates which block you are moving
-        // set based on scale
-        //int row = (int) (y * 5 / (scale * 100));
-        //int col = (int) (x * 5 / (scale * 100));
-        
-        int row = -1;
-        int col = -1;
-        for (int r = 0; r < board.length; r++) {
-        	for (int c = 0; c < board[r].length; c++) {
-        		if (board[r][c] != null) {
-	        		Rectangle bounds = board[r][c].getBounds();
-	        		if (bounds.contains(x,y)) {
-	        			board[r][c].setSelected(true);
-	        			System.out.println("Clicked: " + r + ", " + c);
-	        			row = r;
-	        			col = c;
-	        		}
-        		}
-        	}
-        }
-        if (blockSelected && sBlock[0] != -1) { // if another block has been selected
-        	board[sBlock[0]][sBlock[1]].setSelected(false);
-        }
-        
-        if (row != -1 && board[row][col] != null) {
-        	board[row][col].setSelected(true);
-        	sBlock[0] = row; // corresponding to rows
-	        sBlock[1] = col; // corresponding to columns
-	        System.out.println("sBlock: " + sBlock[0] + ", " + sBlock[1]);
-	        blockSelected = true;
-	        // TEST
-	        printBoard();
-	        // TEST
-	        repaint(); // Request a repaint to update the graphics
-        }
-        
-        
-        
-    }
-
-    // Other MouseListener methods (must be implemented even if empty)
-    @Override public void mousePressed(MouseEvent e) {}
-    @Override public void mouseReleased(MouseEvent e) {}
-    @Override public void mouseEntered(MouseEvent e) {}
-    @Override public void mouseExited(MouseEvent e) {}
 }
