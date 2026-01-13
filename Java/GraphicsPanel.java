@@ -4,11 +4,10 @@
 // Description: This class is the main class for this project.  It extends the Jpanel class and will be drawn on
 // 				on the JPanel in the GraphicsMain class.
 //
-// Edited by: Jacqueline Bellaria, Jessie Liao, Nathaniel Gao, Yicheng Long
-// Date: 3/11/2025
-// Description: Main class for the game, Dino Doom. A player pilots a dinosaur to destroy as many meteors as possible, 
-//              all while avoiding getting hit by the meteors. The dinosaur also has to eat pigs to replenish it's hunger,
-//              or else it will starve to death.
+// Edited by: Jacqueline Bellaria, Lucy Meyer, Valentina Hernandez, Ellie Wu
+// Date: 01/13/2026
+// Description: Main class for the game, 2048. Use the arrow keys to move the blocks so like numbers collide, 
+//				forming the largest number possible before space runs out.
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -113,10 +112,10 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		this.repaint();
 	}
 	
-	public int sumArrayAbs(int[] arr) {
+	public int sumArray(int[] arr) {
 		int sum = 0;
 		for (int i : arr) {
-			sum += Math.abs(i);
+			sum += i;
 		}
 		return sum;
 	}
@@ -131,7 +130,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 			// loop through and set combine = false
 			// addRandomBlock()
 		
-		while (sumArrayAbs(start) != 0 && sumArrayAbs(start) != 4) { // has not yet shifted through all the rows/columns
+		while (sumArray(start) >= 0 && sumArray(start) < 4) { // has not yet shifted through all the rows/columns
 			if (start[0] != 0 && start[1] == 0) { // moving up/down
 				for (int c = 0; c < board[start[0]].length; c++) { // shifting through the blocks in a row
 					if (board[start[0]][c] != null) { // makes sure not trying to move null space
@@ -146,6 +145,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 						// updates block location here
 						if (end + direction[0] < board.length 
 								&& end + direction[0] >= 0 
+								&& board[end + direction[0]][c] != null 
 								&& board[end + direction[0]][c].getValue() == board[start[0]][c].getValue()
 								&& !board[end + direction[0]][c].getCombined()) { // still block hasn't yet been combined
 							// collision
@@ -157,7 +157,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 							
 							score += board[end + direction[0]][c].getValue();
 							board[start[0]][c] = null;
-						} else {
+						} else if (end != start[0]) {
 							// need animation here
 							board[end][c] = board[start[0]][c];
 							// update graphics location
@@ -181,6 +181,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 						// updates block location here
 						if (end + direction[1] < board[r].length 
 								&& end + direction[1] >= 0 
+								&& board[r][end + direction[1]] != null 
 								&& board[r][end + direction[1]].getValue() == board[r][start[1]].getValue() 
 								&& !board[r][end + direction[1]].getCombined()) { // still block hasn't yet been combined
 							// collision
@@ -192,7 +193,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 							
 							score += board[r][end + direction[1]].getValue();
 							board[r][start[1]] = null;
-						} else {
+						} else if (end != start[1]) {
 							// need animation here
 							board[r][end] = board[r][start[1]];
 							// update graphics location
@@ -228,6 +229,162 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		repaint();
 	}
 	
+	public void move(int d) {
+		if (d == 1) { // up
+			for (int r = 1; r < board.length; r++) { // looping through rows 1, 2, & 3
+				for (int c = 0; c < board[r].length; c++) {
+					if (board[r][c] != null) {
+						int endRow = r;
+						
+						while (endRow + direction[0] >= 0 && board[endRow + direction[0]][c] == null) {
+							endRow += direction[0]; // moves to empty spaces
+						}
+						
+						if (endRow + direction[0] >= 0 
+								&& board[endRow + direction[0]][c] != null 
+								&& board[endRow + direction[0]][c].getValue() == board[r][c].getValue() 
+								&& !board[endRow + direction[0]][c].getCombined()) { // collision
+							// collision
+							// need animation here
+							board[endRow + direction[0]][c].doubleValue();
+							board[endRow + direction[0]][c].setCombined(true);
+							// update graphics location
+							// shouldn't need to update Y b/c staying in same place
+							
+							score += board[endRow + direction[0]][c].getValue();
+							board[r][c] = null;
+						} else if (endRow != r) { // no collision
+							// need animation here
+							board[endRow][c] = board[r][c];
+							// update graphics location
+							board[endRow][c].setY(14 + 122 * endRow);
+							
+							board[r][c] = null;
+						}
+					}
+				}
+			}
+		} else if (d == 2) { // down
+			for (int r = board.length - 2; r >= 0; r--) { // looping through rows 2, 1, & 0
+				for (int c = 0; c < board[r].length; c++) {
+					if (board[r][c] != null) {
+						int endRow = r;
+						
+						while (endRow + direction[0] < board.length && board[endRow + direction[0]][c] == null) {
+							endRow += direction[0]; // moves to empty spaces
+						}
+						
+						if (endRow + direction[0] < board.length 
+								&& board[endRow + direction[0]][c] != null 
+								&& board[endRow + direction[0]][c].getValue() == board[r][c].getValue() 
+								&& !board[endRow + direction[0]][c].getCombined()) { // collision
+							// collision
+							// need animation here
+							board[endRow + direction[0]][c].doubleValue();
+							board[endRow + direction[0]][c].setCombined(true);
+							// update graphics location
+							// shouldn't need to update Y b/c staying in same place
+							
+							score += board[endRow + direction[0]][c].getValue();
+							board[r][c] = null;
+						} else if (endRow != r) { // no collision
+							// need animation here
+							board[endRow][c] = board[r][c];
+							// update graphics location
+							board[endRow][c].setY(14 + 122 * endRow);
+							
+							board[r][c] = null;
+						}
+					}
+				}
+			}
+		} else if (d == 3) { // left
+			for (int c = 1; c < board[0].length; c++) { // looping through columns 1, 2, & 3
+				for (int r = 0; r < board.length; r++) {
+					if (board[r][c] != null) {
+						int endCol = c;
+						
+						while (endCol + direction[1] >= 0 && board[r][endCol + direction[1]] == null) {
+							endCol += direction[1]; // moves to empty spaces
+						}
+						
+						if (endCol + direction[1] >= 0 
+								&& board[r][endCol + direction[1]] != null 
+								&& board[r][endCol + direction[1]].getValue() == board[r][c].getValue() 
+								&& !board[r][endCol + direction[1]].getCombined()) { // collision
+							// collision
+							// need animation here
+							board[r][endCol + direction[1]].doubleValue();
+							board[r][endCol + direction[1]].setCombined(true);
+							// update graphics location
+							// shouldn't need to update X b/c staying in same place
+							
+							score += board[r][endCol + direction[1]].getValue();
+							board[r][c] = null;
+						} else if (endCol != c) { // no collision
+							// need animation here
+							board[r][endCol] = board[r][c];
+							// update graphics location
+							board[r][endCol].setX(14 + 122 * endCol);
+							
+							board[r][c] = null;
+						}
+					}
+				}
+			}
+		} else if (d == 4) { // right
+			for (int c = board[1].length - 2; c >= 0; c--) { // looping through columns 2, 1, & 0
+				for (int r = 0; r < board.length; r++) {
+					if (board[r][c] != null) {
+						int endCol = c;
+						
+						while (endCol + direction[1] < board[c].length && board[r][endCol + direction[1]] == null) {
+							endCol += direction[1]; // moves to empty spaces
+						}
+						
+						if (endCol + direction[1] < board[r].length 
+								&& board[r][endCol + direction[1]] != null 
+								&& board[r][endCol + direction[1]].getValue() == board[r][c].getValue() 
+								&& !board[r][endCol + direction[1]].getCombined()) { // collision
+							// collision
+							// need animation here
+							board[r][endCol + direction[1]].doubleValue();
+							board[r][endCol + direction[1]].setCombined(true);
+							// update graphics location
+							// shouldn't need to update X b/c staying in same place
+							
+							score += board[r][endCol + direction[1]].getValue();
+							board[r][c] = null;
+						} else if (endCol != c) { // no collision
+							// need animation here
+							board[r][endCol] = board[r][c];
+							// update graphics location
+							board[r][endCol].setX(14 + 122 * endCol);
+							
+							board[r][c] = null;
+						}
+					}
+				}
+			}
+		}
+		
+		for (int r = 0; r < board.length; r++) { // resetting combined boolean for all blocks.
+			for (int c = 0; c < board[r].length; c++) {
+				if (board[r][c] != null && board[r][c].getCombined()) {
+					board[r][c].setCombined(false);
+				}
+			}
+		}
+		
+		moves++;
+		addRandomBlock();
+		
+		// in the areas with animation will want the repaint() there. 
+		// Maybe after a full row/column has moved in logic so they all move at once?
+		// Don't know how to make that happen though
+		repaint();
+	}
+	
 	public void addRandomBlock() {
 		// create 2d ArrayList of empty spaces on board
 		ArrayList<int[]> empty = new ArrayList<>();
@@ -254,6 +411,13 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		System.out.println("");
 		// TEST
 		
+		// game over code
+		if (empty.isEmpty()) {
+			gameOver = true;
+			System.exit(0);
+		}
+		
+		// add new block
 		int[] add = empty.get((int) (Math.random() * empty.size()));
 		int value = 0;
 		if (Math.random() >= 0.9) value = 4;
@@ -284,27 +448,28 @@ public class GraphicsPanel extends JPanel implements KeyListener{
         	direction[0] = -1;
         	start[0] = 1;
 			System.out.println("up");
+			move(1);
         }
         else if (keyCode == KeyEvent.VK_DOWN) {
         	direction[0] = 1;
         	start[0] = 2;
 			System.out.println("down");
+			move(2);
         }
         else if (keyCode == KeyEvent.VK_LEFT) {
         	direction[1] = -1;
         	start[1] = 1;
 			System.out.println("left");
+			move(3);
         }
         else if (keyCode == KeyEvent.VK_RIGHT) {
         	direction[1] = 1;
         	start[1] = 2;
 			System.out.println("right");
+			move(4);
         }
 		
-		animate();
 		// TEST
-		System.out.println("Direction: " + direction[0] + ", " + direction[1]);
-		//testDirection();
 		printBoard();
 		// TEST
 	}
