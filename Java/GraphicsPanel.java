@@ -4,10 +4,11 @@
 // Description: This class is the main class for this project.  It extends the Jpanel class and will be drawn on
 // 				on the JPanel in the GraphicsMain class.
 //
-// Edited by: Jacqueline Bellaria, Lucy Meyer, Valentina Hernandez, Ellie Wu
-// Date: 01/13/2026
-// Description: Main class for the game, 2048. Use the arrow keys to move the blocks so like numbers collide, 
-//				forming the largest number possible before space runs out.
+// Edited by: Jacqueline Bellaria, Jessie Liao, Nathaniel Gao, Yicheng Long
+// Date: 3/11/2025
+// Description: Main class for the game, Dino Doom. A player pilots a dinosaur to destroy as many meteors as possible, 
+//              all while avoiding getting hit by the meteors. The dinosaur also has to eat pigs to replenish it's hunger,
+//              or else it will starve to death.
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -118,115 +119,6 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 			sum += i;
 		}
 		return sum;
-	}
-	
-	public void animate() {
-		// start with the second from last row/column depending on direction
-			// see if the blocks there can move in the right direction
-			// or combine, combine = true, score update, image update.
-		// then go to next row/column, then last
-		
-		// after loop:
-			// loop through and set combine = false
-			// addRandomBlock()
-		
-		while (sumArray(start) >= 0 && sumArray(start) < 4) { // has not yet shifted through all the rows/columns
-			if (start[0] != 0 && start[1] == 0) { // moving up/down
-				for (int c = 0; c < board[start[0]].length; c++) { // shifting through the blocks in a row
-					if (board[start[0]][c] != null) { // makes sure not trying to move null space
-						int end = start[0]; // updating what row block is on
-						
-						while (end + direction[0] < board.length 
-								&& end + direction[0] >= 0 
-								&& board[end + direction[0]][c] == null) {
-							end += direction[0]; // moves to empty spaces
-						}
-						
-						// updates block location here
-						if (end + direction[0] < board.length 
-								&& end + direction[0] >= 0 
-								&& board[end + direction[0]][c] != null 
-								&& board[end + direction[0]][c].getValue() == board[start[0]][c].getValue()
-								&& !board[end + direction[0]][c].getCombined()) { // still block hasn't yet been combined
-							// collision
-							// need animation here
-							board[end + direction[0]][c].doubleValue();
-							board[end + direction[0]][c].setCombined(true);
-							// update graphics location
-							board[end + direction[0]][c].setY(14 + 122 * (end + direction[0]));
-							
-							score += board[end + direction[0]][c].getValue();
-							board[start[0]][c] = null;
-						} else if (end != start[0]) {
-							// need animation here
-							board[end][c] = board[start[0]][c];
-							// update graphics location
-							board[end][c].setY(14 + 122 * end);
-							
-							board[start[0]][c] = null;
-						}
-					}
-				}
-			} else if (start[0] == 0 && start[1] != 0) { // moving left/right
-				for (int r = 0; r < board.length; r++) { // shifting through the blocks in a column
-					if (board[r][start[1]] != null) { // makes sure not trying to move null space
-						int end = start[1]; // updating what column block is on
-						
-						while (end + direction[1] < board[r].length 
-								&& end + direction[1] >= 0 
-								&& board[r][end + direction[1]] == null) {
-							end += direction[1]; // moves to empty space
-						}
-						
-						// updates block location here
-						if (end + direction[1] < board[r].length 
-								&& end + direction[1] >= 0 
-								&& board[r][end + direction[1]] != null 
-								&& board[r][end + direction[1]].getValue() == board[r][start[1]].getValue() 
-								&& !board[r][end + direction[1]].getCombined()) { // still block hasn't yet been combined
-							// collision
-							// need animation here
-							board[r][end + direction[1]].doubleValue();
-							board[r][end + direction[1]].setCombined(true);
-							// update graphics location
-							board[r][end + direction[1]].setX(14 + 122 * (end + direction[1]));
-							
-							score += board[r][end + direction[1]].getValue();
-							board[r][start[1]] = null;
-						} else if (end != start[1]) {
-							// need animation here
-							board[r][end] = board[r][start[1]];
-							// update graphics location
-							board[r][end].setX(14 + 122 * end);
-							
-							board[r][start[1]] = null;
-						}
-					}
-				}
-			}
-			
-			start[0] -= direction[0]; // moving down/up a row/column
-			start[1] -= direction[1];
-		}
-		
-		// setting all combined values to false for next play.
-		for (int r = 0; r < board.length; r++) {
-			for (int c = 0; c < board[r].length; c++) {
-				if (board[r][c] != null && board[r][c].getCombined()) {
-					board[r][c].setCombined(false);
-				}
-			}
-		}
-		
-		start[0] = 0;
-		start[1] = 0;
-		moves++;
-		addRandomBlock();
-		
-		// in the areas with animation will want the repaint() there. 
-		// Maybe after a full row/column has moved in logic so they all move at once?
-		// Don't know how to make that happen though
-		repaint();
 	}
 	
 	public void move(int d) {
