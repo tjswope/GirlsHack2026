@@ -113,46 +113,14 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		this.repaint();
 	}
 	
-	public int sumArray(int[] arr) {
-		int sum = 0;
-		for (int i : arr) {
-			sum += i;
-		}
-		return sum;
-	}
-	
 	public void move(int d) {
 		if (d == 1) { // up
 			for (int r = 1; r < board.length; r++) { // looping through rows 1, 2, & 3
 				for (int c = 0; c < board[r].length; c++) {
 					if (board[r][c] != null) {
-						int endRow = r;
-						
-						while (endRow + direction[0] >= 0 && board[endRow + direction[0]][c] == null) {
-							endRow += direction[0]; // moves to empty spaces
-						}
-						
-						if (endRow + direction[0] >= 0 
-								&& board[endRow + direction[0]][c] != null 
-								&& board[endRow + direction[0]][c].getValue() == board[r][c].getValue() 
-								&& !board[endRow + direction[0]][c].getCombined()) { // collision
-							// collision
-							// need animation here
-							board[endRow + direction[0]][c].doubleValue();
-							board[endRow + direction[0]][c].setCombined(true);
-							// update graphics location
-							// shouldn't need to update Y b/c staying in same place
-							
-							score += board[endRow + direction[0]][c].getValue();
-							board[r][c] = null;
-						} else if (endRow != r) { // no collision
-							// need animation here
-							board[endRow][c] = board[r][c];
-							// update graphics location
-							board[endRow][c].setY(14 + 122 * endRow);
-							
-							board[r][c] = null;
-						}
+						// move the blocks until they collide with something, stop at a different numbered block, or hit the walls
+						// if they collide, the formed block can't collide with anything else
+						// score doubles during collision
 					}
 				}
 			}
@@ -160,33 +128,9 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 			for (int r = board.length - 2; r >= 0; r--) { // looping through rows 2, 1, & 0
 				for (int c = 0; c < board[r].length; c++) {
 					if (board[r][c] != null) {
-						int endRow = r;
-						
-						while (endRow + direction[0] < board.length && board[endRow + direction[0]][c] == null) {
-							endRow += direction[0]; // moves to empty spaces
-						}
-						
-						if (endRow + direction[0] < board.length 
-								&& board[endRow + direction[0]][c] != null 
-								&& board[endRow + direction[0]][c].getValue() == board[r][c].getValue() 
-								&& !board[endRow + direction[0]][c].getCombined()) { // collision
-							// collision
-							// need animation here
-							board[endRow + direction[0]][c].doubleValue();
-							board[endRow + direction[0]][c].setCombined(true);
-							// update graphics location
-							// shouldn't need to update Y b/c staying in same place
-							
-							score += board[endRow + direction[0]][c].getValue();
-							board[r][c] = null;
-						} else if (endRow != r) { // no collision
-							// need animation here
-							board[endRow][c] = board[r][c];
-							// update graphics location
-							board[endRow][c].setY(14 + 122 * endRow);
-							
-							board[r][c] = null;
-						}
+						// move the blocks until they collide with something, stop at a different numbered block, or hit the walls
+						// if they collide, the formed block can't collide with anything else
+						// score doubles during collision
 					}
 				}
 			}
@@ -194,33 +138,9 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 			for (int c = 1; c < board[0].length; c++) { // looping through columns 1, 2, & 3
 				for (int r = 0; r < board.length; r++) {
 					if (board[r][c] != null) {
-						int endCol = c;
-						
-						while (endCol + direction[1] >= 0 && board[r][endCol + direction[1]] == null) {
-							endCol += direction[1]; // moves to empty spaces
-						}
-						
-						if (endCol + direction[1] >= 0 
-								&& board[r][endCol + direction[1]] != null 
-								&& board[r][endCol + direction[1]].getValue() == board[r][c].getValue() 
-								&& !board[r][endCol + direction[1]].getCombined()) { // collision
-							// collision
-							// need animation here
-							board[r][endCol + direction[1]].doubleValue();
-							board[r][endCol + direction[1]].setCombined(true);
-							// update graphics location
-							// shouldn't need to update X b/c staying in same place
-							
-							score += board[r][endCol + direction[1]].getValue();
-							board[r][c] = null;
-						} else if (endCol != c) { // no collision
-							// need animation here
-							board[r][endCol] = board[r][c];
-							// update graphics location
-							board[r][endCol].setX(14 + 122 * endCol);
-							
-							board[r][c] = null;
-						}
+						// move the blocks until they collide with something, stop at a different numbered block, or hit the walls
+						// if they collide, the formed block can't collide with anything else
+						// score doubles during collision
 					}
 				}
 			}
@@ -228,33 +148,9 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 			for (int c = board[1].length - 2; c >= 0; c--) { // looping through columns 2, 1, & 0
 				for (int r = 0; r < board.length; r++) {
 					if (board[r][c] != null) {
-						int endCol = c;
-						
-						while (endCol + direction[1] < board[c].length && board[r][endCol + direction[1]] == null) {
-							endCol += direction[1]; // moves to empty spaces
-						}
-						
-						if (endCol + direction[1] < board[r].length 
-								&& board[r][endCol + direction[1]] != null 
-								&& board[r][endCol + direction[1]].getValue() == board[r][c].getValue() 
-								&& !board[r][endCol + direction[1]].getCombined()) { // collision
-							// collision
-							// need animation here
-							board[r][endCol + direction[1]].doubleValue();
-							board[r][endCol + direction[1]].setCombined(true);
-							// update graphics location
-							// shouldn't need to update X b/c staying in same place
-							
-							score += board[r][endCol + direction[1]].getValue();
-							board[r][c] = null;
-						} else if (endCol != c) { // no collision
-							// need animation here
-							board[r][endCol] = board[r][c];
-							// update graphics location
-							board[r][endCol].setX(14 + 122 * endCol);
-							
-							board[r][c] = null;
-						}
+						// move the blocks until they collide with something, stop at a different numbered block, or hit the walls
+						// if they collide, the formed block can't collide with anything else
+						// score doubles during collision
 					}
 				}
 			}
@@ -271,9 +167,6 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		moves++;
 		addRandomBlock();
 		
-		// in the areas with animation will want the repaint() there. 
-		// Maybe after a full row/column has moved in logic so they all move at once?
-		// Don't know how to make that happen though
 		repaint();
 	}
 	
@@ -282,26 +175,8 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		ArrayList<int[]> empty = new ArrayList<>();
 		
 		// adds empty spaces to ArrayList
-		for (int r = 0; r < board.length; r++) {
-			for (int c = 0; c < board[r].length; c++) {
-				if (board[r][c] == null) {
-					int[] e = {r, c};
-					empty.add(e);
-				}
-			}
-		}
+		// loop through the board and add the null spaces to empty
 		
-		// TEST
-		System.out.println("Empty: ");
-		for (int[] place : empty) {
-			System.out.print("(");
-			for (int i : place) {
-				System.out.print(i + " ");
-			}
-			System.out.print(") ");
-		}
-		System.out.println("");
-		// TEST
 		
 		// game over code
 		if (empty.isEmpty()) {
@@ -312,22 +187,12 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		// add new block
 		int[] add = empty.get((int) (Math.random() * empty.size()));
 		int value = 0;
-		if (Math.random() >= 0.9) value = 4;
-		else value = 2;
+		
+		// set value of new block, 2 = 90%, 4 = 10%
+		value = 2;
+		
 		board[add[0]][add[1]] = new Block(14 + add[1] * 122, 14 + add[0] * 122, value, 1);
 	}
-	
-    // TEST
-	public void printBoard() {
-		for (int r = 0; r < board.length; r++) {
-			for (int c = 0; c < board[r].length; c++) {
-				if (board[r][c] != null) System.out.print(board[r][c].getValue() + " ");
-				else System.out.print("0 ");
-			}
-			System.out.println("");
-		}
-	}
-    // TEST
 	
 	// method: keyPressed()
 	// description: This method is called when a key is pressed. You can determine which key is pressed using the
