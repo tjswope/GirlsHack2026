@@ -226,9 +226,6 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 			move(4);
         }
 		
-		// TEST
-		printBoard();
-		// TEST
 	}
 	@Override public void keyTyped(KeyEvent e) {}
 	@Override public void keyReleased(KeyEvent e) {}
