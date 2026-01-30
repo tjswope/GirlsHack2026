@@ -78,11 +78,11 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		
 		
 		//draw words, first sets font, then color
-		Font stringFont = new Font( "SansSerif", Font.BOLD, 20 );
+		Font stringFont = new Font("SansSerif", Font.PLAIN, 30);
 	    g.setFont(stringFont);
 		g.setColor(Color.BLACK);
 		// prints the score of the player (based on how many meteors they shoot)
-		g.drawString("Score: " + score, 20, 55);
+		g.drawString("" + score, 250, 529);
 		
 		
 		// draw all the blocks
