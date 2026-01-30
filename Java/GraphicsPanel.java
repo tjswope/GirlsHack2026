@@ -4,11 +4,9 @@
 // Description: This class is the main class for this project.  It extends the Jpanel class and will be drawn on
 // 				on the JPanel in the GraphicsMain class.
 //
-// Edited by: Jacqueline Bellaria, Jessie Liao, Nathaniel Gao, Yicheng Long
-// Date: 3/11/2025
-// Description: Main class for the game, Dino Doom. A player pilots a dinosaur to destroy as many meteors as possible, 
-//              all while avoiding getting hit by the meteors. The dinosaur also has to eat pigs to replenish it's hunger,
-//              or else it will starve to death.
+// Edited by: Jacqueline, Valentina, Lucy, Ellie
+// Date: 01/30/2025
+// Description: Main class for the game, 2048. 
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -24,39 +22,34 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 public class GraphicsPanel extends JPanel implements KeyListener{
-	private Timer Timer;					// The bTimer is used to move objects at a consistent bTime interval.
+	private Timer Timer;					// The Timer is used to move objects at a consistent bTime interval.
 	
 	private int score; // score for how many meteors destroyed
 	private int moves;
-	private int scale; 
 	private int[] direction; // direction that blocks are moving
-	private int[] start; // indicating starting row/column that must move first
 	private Block[][] board;
 	
+	private int width; 
+	private int buffer;
 	private Background background;	// background
 	
 	
-	
-	private boolean gameOver; // if the game is over
-	
-	
 	public GraphicsPanel(){
-		background = new DesertBackground();
+		// establishes the size of the board and blocks based on block width
+		width = 106; // size of Blocks in px. Width = height, 106 = default
+		background = new Background(width * 500/106); // change numerator of fraction for board size, 500 = default
+		buffer = (int)(width * 14/106); // change numerator of fraction, 14 = default
+		
 		// establishes the beginning.
 		score = 0;
 		moves = 0;
 		direction = new int[2];
-		start = new int[2];
 		board = new Block[4][4];
 		// initialize initial board here -> 2 random blocks
 		addRandomBlock();
 		addRandomBlock();
 		
-		// TEST
-		//board[2][2] = new Block(14 + 2 * 122, 14 + 2 * 122, 2, 1);
-		// TEST
 		
-		scale = 1; // size of board / Blocks
 		
 		// This line of code sets the dimension of the panel equal to the dimensions
 		// of the background image.
@@ -70,8 +63,6 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		this.setFocusable(true);					     // for keylistener
 		this.addKeyListener(this);
 	
-	    
-	    gameOver = false;
 	}
 	
 	// method: paintComponent
@@ -113,14 +104,10 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		this.repaint();
 	}
 	
-	public int sumArray(int[] arr) {
-		int sum = 0;
-		for (int i : arr) {
-			sum += i;
-		}
-		return sum;
-	}
-	
+	// Method: move
+	// Description: the logic portion of how the blocks move. Will move all the blocks and collide as needed.
+	// Parameters: int d, the direction.
+	// Return: N/A
 	public void move(int d) {
 		if (d == 1) { // up
 			for (int r = 1; r < board.length; r++) { // looping through rows 1, 2, & 3
@@ -138,6 +125,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 								&& !board[endRow + direction[0]][c].getCombined()) { // collision
 							// collision
 							// need animation here
+							
 							board[endRow + direction[0]][c].doubleValue();
 							board[endRow + direction[0]][c].setCombined(true);
 							// update graphics location
@@ -149,7 +137,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 							// need animation here
 							board[endRow][c] = board[r][c];
 							// update graphics location
-							board[endRow][c].setY(14 + 122 * endRow);
+							board[endRow][c].setY(buffer + (width + buffer) * endRow);
 							
 							board[r][c] = null;
 						}
@@ -183,7 +171,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 							// need animation here
 							board[endRow][c] = board[r][c];
 							// update graphics location
-							board[endRow][c].setY(14 + 122 * endRow);
+							board[endRow][c].setY(buffer + (width + buffer) * endRow);
 							
 							board[r][c] = null;
 						}
@@ -217,7 +205,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 							// need animation here
 							board[r][endCol] = board[r][c];
 							// update graphics location
-							board[r][endCol].setX(14 + 122 * endCol);
+							board[r][endCol].setX(buffer + (width + buffer) * endCol);
 							
 							board[r][c] = null;
 						}
@@ -251,7 +239,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 							// need animation here
 							board[r][endCol] = board[r][c];
 							// update graphics location
-							board[r][endCol].setX(14 + 122 * endCol);
+							board[r][endCol].setX(buffer + (width + buffer) * endCol);
 							
 							board[r][c] = null;
 						}
@@ -277,6 +265,11 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		repaint();
 	}
 	
+	// Method: addRandomBlock
+	// Description: finds all the empty spaces in the array and randomly adds a block to one of the empty spaces. 
+	// 				The block has 90% chance of being a 2, 10% chance of being a 4.
+	// Parameters: N/A
+	// Return: N/A
 	public void addRandomBlock() {
 		// create 2d ArrayList of empty spaces on board
 		ArrayList<int[]> empty = new ArrayList<>();
@@ -291,21 +284,8 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 			}
 		}
 		
-		// TEST
-		System.out.println("Empty: ");
-		for (int[] place : empty) {
-			System.out.print("(");
-			for (int i : place) {
-				System.out.print(i + " ");
-			}
-			System.out.print(") ");
-		}
-		System.out.println("");
-		// TEST
-		
 		// game over code
 		if (empty.isEmpty()) {
-			gameOver = true;
 			System.exit(0);
 		}
 		
@@ -314,20 +294,9 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		int value = 0;
 		if (Math.random() >= 0.9) value = 4;
 		else value = 2;
-		board[add[0]][add[1]] = new Block(14 + add[1] * 122, 14 + add[0] * 122, value, 1);
+		// blocks height & width = 106 px, padding of 14 px.
+		board[add[0]][add[1]] = new Block(buffer + add[1] * (width + buffer), buffer + add[0] * (width + buffer), value, width);
 	}
-	
-    // TEST
-	public void printBoard() {
-		for (int r = 0; r < board.length; r++) {
-			for (int c = 0; c < board[r].length; c++) {
-				if (board[r][c] != null) System.out.print(board[r][c].getValue() + " ");
-				else System.out.print("0 ");
-			}
-			System.out.println("");
-		}
-	}
-    // TEST
 	
 	// method: keyPressed()
 	// description: This method is called when a key is pressed. You can determine which key is pressed using the
@@ -338,32 +307,24 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		int keyCode = e.getKeyCode();
 		if (keyCode == KeyEvent.VK_UP) {
         	direction[0] = -1;
-        	start[0] = 1;
 			System.out.println("up");
 			move(1);
         }
         else if (keyCode == KeyEvent.VK_DOWN) {
         	direction[0] = 1;
-        	start[0] = 2;
 			System.out.println("down");
 			move(2);
         }
         else if (keyCode == KeyEvent.VK_LEFT) {
         	direction[1] = -1;
-        	start[1] = 1;
 			System.out.println("left");
 			move(3);
         }
         else if (keyCode == KeyEvent.VK_RIGHT) {
         	direction[1] = 1;
-        	start[1] = 2;
 			System.out.println("right");
 			move(4);
         }
-		
-		// TEST
-		printBoard();
-		// TEST
 	}
 	@Override public void keyTyped(KeyEvent e) {}
 	@Override public void keyReleased(KeyEvent e) {}
