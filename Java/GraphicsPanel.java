@@ -39,6 +39,11 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	
 	private boolean gameOver; // if the game is over
 	
+	private double animationProgress = 0.0;
+	private boolean isAnimating=false;
+	private final double ANIMATION_STEP=0.05;
+	
+	private ArrayList<Block> mergingBlocks = new ArrayList<>();
 	
 	public GraphicsPanel(){
 		background = new DesertBackground();
@@ -66,7 +71,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 													 	 // action performed method every 5 milliseconds once the
 													 	 // bTimer is started. You can change how frequently this
 													 	 // method is called by changing the first parameter.
-		//Timer.start();
+		Timer.start();
 		this.setFocusable(true);					     // for keylistener
 		this.addKeyListener(this);
 	
@@ -97,11 +102,28 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		// draw all the blocks
 		for (int r = 0; r < board.length; r++) {
 			for (int c = 0; c < board[r].length; c++) {
-				if (board[r][c] != null) board[r][c].draw(g2, this);
+				if (board[r][c] != null) drawAnimatedBlock(g2,board[r][c]);
 			}
 		}
 		
+		
 
+	}
+	
+	private void drawAnimatedBlock(Graphics2D g2, Block b) {
+	    int logicalX = b.getX();
+	    int logicalY = b.getY();
+	    
+	    int visualX = b.getVisualX(animationProgress);
+	    int visualY = b.getVisualY(animationProgress);
+	    
+	    b.setX(visualX);
+	    b.setY(visualY);
+	    
+	    b.draw(g2, this);
+	    
+	    b.setX(logicalX);
+	    b.setY(logicalY);
 	}
 	
 	// method:clock
@@ -109,8 +131,24 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	//				of one of your characters in this method so that it moves as bTime changes.  After you update the
 	//				coordinates you should repaint the panel.
 	public void clock(){
-		// step-by-step animation will occur here
-		this.repaint();
+		if(isAnimating) {
+			animationProgress+=ANIMATION_STEP;
+		}
+		if( animationProgress>=1.0) {
+			animationProgress=1.0;
+			isAnimating=false;
+			mergingBlocks.clear();
+			
+			for(int i=0;i<4;i++) {
+				for(int b=0;b<4;b++) {
+					if(board[i][b]!=null) {
+						board[i][b].resetAnimation();
+					}
+				}
+			}
+	
+		}
+		repaint();
 	}
 	
 	public int sumArray(int[] arr) {
@@ -122,6 +160,16 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	}
 	
 	public void move(int d) {
+		
+		for(int i=0;i<board.length;i++) {
+			for(int b=0;b<board[i].length;b++) {
+				if(board[i][b]!=null) {
+					board[i][b].resetAnimation();
+				}
+			}
+		}
+		
+		
 		if (d == 1) { // up
 			for (int r = 1; r < board.length; r++) { // looping through rows 1, 2, & 3
 				for (int c = 0; c < board[r].length; c++) {
@@ -136,10 +184,17 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 								&& board[endRow + direction[0]][c] != null 
 								&& board[endRow + direction[0]][c].getValue() == board[r][c].getValue() 
 								&& !board[endRow + direction[0]][c].getCombined()) { // collision
-							// collision
-							// need animation here
+							//animation
+							board[r][c].setX(board[endRow + direction[0]][c].getX());
+							board[r][c].setY(board[endRow + direction[0]][c].getY());
+
+							mergingBlocks.add(board[r][c]);
+
 							board[endRow + direction[0]][c].doubleValue();
 							board[endRow + direction[0]][c].setCombined(true);
+							score += board[endRow + direction[0]][c].getValue();
+							board[r][c] = null;
+					
 							// update graphics location
 							// shouldn't need to update Y b/c staying in same place
 							
@@ -170,17 +225,26 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 								&& board[endRow + direction[0]][c] != null 
 								&& board[endRow + direction[0]][c].getValue() == board[r][c].getValue() 
 								&& !board[endRow + direction[0]][c].getCombined()) { // collision
-							// collision
-							// need animation here
+							//animation
+							board[r][c].setX(board[endRow + direction[0]][c].getX());
+							board[r][c].setY(board[endRow + direction[0]][c].getY());
+
+							mergingBlocks.add(board[r][c]);
+
 							board[endRow + direction[0]][c].doubleValue();
 							board[endRow + direction[0]][c].setCombined(true);
+							score += board[endRow + direction[0]][c].getValue();
+							board[r][c] = null;
+							
+	
 							// update graphics location
 							// shouldn't need to update Y b/c staying in same place
 							
 							score += board[endRow + direction[0]][c].getValue();
 							board[r][c] = null;
-						} else if (endRow != r) { // no collision
-							// need animation here
+						} else if (endRow != r) { 
+							//animation
+
 							board[endRow][c] = board[r][c];
 							// update graphics location
 							board[endRow][c].setY(14 + 122 * endRow);
@@ -204,8 +268,28 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 								&& board[r][endCol + direction[1]] != null 
 								&& board[r][endCol + direction[1]].getValue() == board[r][c].getValue() 
 								&& !board[r][endCol + direction[1]].getCombined()) { // collision
-							// collision
-							// need animation here
+							
+							
+							    board[r][c].setY(board[endRow + direction[0]][c].getY());
+							    board[r][c].setX(board[endRow + direction[0]][c].getX());
+
+							    mergingBlocks.add(board[r][c]);
+
+							    board[r][c] = null;
+
+							    board[endRow + direction[0]][c].doubleValue();
+							
+							//animation 
+							board[r][c].setX(board[endRow + direction[0]][c].getX());
+							board[r][c].setY(board[endRow + direction[0]][c].getY());
+
+							mergingBlocks.add(board[r][c]);
+
+							board[endRow + direction[0]][c].doubleValue();
+							board[endRow + direction[0]][c].setCombined(true);
+							score += board[endRow + direction[0]][c].getValue();
+							
+							board[r][c] = null;
 							board[r][endCol + direction[1]].doubleValue();
 							board[r][endCol + direction[1]].setCombined(true);
 							// update graphics location
@@ -213,8 +297,13 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 							
 							score += board[r][endCol + direction[1]].getValue();
 							board[r][c] = null;
-						} else if (endCol != c) { // no collision
-							// need animation here
+						} else if (endCol != c) { 
+							//animation
+							board[endRow][c] = board[r][c];
+
+							board[endRow][c].setY(14 + 122 * endRow); 
+
+							board[r][c] = null;
 							board[r][endCol] = board[r][c];
 							// update graphics location
 							board[r][endCol].setX(14 + 122 * endCol);
@@ -274,7 +363,8 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		// in the areas with animation will want the repaint() there. 
 		// Maybe after a full row/column has moved in logic so they all move at once?
 		// Don't know how to make that happen though
-		repaint();
+	this.animationProgress=0;
+	this.isAnimating=true;
 	}
 	
 	public void addRandomBlock() {
@@ -315,6 +405,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		if (Math.random() >= 0.9) value = 4;
 		else value = 2;
 		board[add[0]][add[1]] = new Block(14 + add[1] * 122, 14 + add[0] * 122, value, 1);
+		board[add[0]][add[1]].resetAnimation();
 	}
 	
     // TEST
