@@ -2,11 +2,19 @@ public class Block extends Item {
 	private int value;
 	private int scale;
 	private boolean combined;
+	
+	private int prevX;
+	private int prevY;
+	
 	public Block(int x_coordinate, int y_coordinate, int value, int scale) {
 		super(x_coordinate, y_coordinate, "images/" + value + ".png/", scale);
 		this.value = value;
 		this.scale = scale;
 		this.combined = false;
+		
+		this.prevX=x_coordinate;
+		this.prevY=y_coordinate;
+		
     }
 	
 	public void doubleValue() {
@@ -40,7 +48,29 @@ public class Block extends Item {
     }
     
     public void move(int[] dir){
+    	this.prevX=this.x_coordinate;
+    	this.prevY=this.y_coordinate;
+    	
 		y_coordinate += dir[0];
 		x_coordinate += dir[1];
+		
     }
+    
+    public void resetAnimation() {
+    	this.prevX=this.x_coordinate;
+    	this.prevY=this.y_coordinate;
+    	
+    }
+    
+    
+    public int getVisualX(double t) {
+    	return(int)(prevX+(x_coordinate-prevX)*t);
+    	
+    }
+   
+    public int getVisualY(double t) {
+    	return(int)(prevY+(y_coordinate-prevY)*t);
+    	
+    }
+    
 }
