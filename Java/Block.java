@@ -1,17 +1,21 @@
+// Class: Block
+// Written By: Jacqueline, Valentina, Lucy, Ellie
+// Date: 01/30/2026
+// Description: the Block object for the game 2048
 public class Block extends Item {
 	private int value;
-	private int scale;
+	private int width;
 	private boolean combined;
-	public Block(int x_coordinate, int y_coordinate, int value, int scale) {
-		super(x_coordinate, y_coordinate, "images/" + value + ".png/", scale);
+	public Block(int x_coordinate, int y_coordinate, int value, int width) {
+		super(x_coordinate, y_coordinate, "images/" + value + ".png/", width);
 		this.value = value;
-		this.scale = scale;
+		this.width = width;
 		this.combined = false;
     }
 	
 	public void doubleValue() {
 		value *= 2;
-		Block newBlock = new Block(this.x_coordinate, this.y_coordinate, this.value, this.scale);
+		Block newBlock = new Block(this.x_coordinate, this.y_coordinate, this.value, this.width);
 		this.image = newBlock.image;
 	}
 	
@@ -27,16 +31,21 @@ public class Block extends Item {
     	this.y_coordinate = y_coordinate;
     }
     
-    public int getScale() {
-    	return scale;
-    }
-    
     public void setCombined(boolean combined) {
     	this.combined = combined;
     }
     
     public boolean getCombined() {
     	return combined;
+    }
+    
+    // default width & height = 106 px
+    public int getWidth() {
+    	return image.getIconWidth();
+    }
+    
+    public int getHeight() {
+    	return image.getIconHeight();
     }
     
     public void move(int[] dir){
