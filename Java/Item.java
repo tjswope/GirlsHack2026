@@ -3,7 +3,10 @@
 // Date: 1/27/2020
 // Description: This class implements an Item.  This Item will be drawn onto a graphics panel. 
 // 
-// If you modify this class you should add comments that describe how you modified the class.  
+// Edited By: Jacqueline
+// Date: 01/30/2026
+// Description: shifted the way the initializer would scale items to be based on the item's pixel width.
+// 				DO NOT MODIFY!!!
 
 import java.awt.Component;
 import java.awt.Graphics;
@@ -52,7 +55,7 @@ public class Item{
 	//                           your project's src folder.
 	//             imageScale - imageScale is used to make the image bigger or smaller on the Panel. The bigger
 	// 						    the imageScale, the smaller the image will be.
-	public Item(int x_coordinate, int y_coordinate, String imageString, int imageScale){
+	public Item(int x_coordinate, int y_coordinate, String imageString, int width){
 
 		this.x_coordinate = x_coordinate;						// Initial coordinates for the Item.
 		this.y_coordinate = y_coordinate; 
@@ -65,9 +68,10 @@ public class Item{
 		URL imageURL = cldr.getResource(imagePath);				
 		
 		image = new ImageIcon(imageURL);
-		
-		Image scaled = image.getImage().getScaledInstance(image.getIconWidth() / imageScale, 
-				image.getIconHeight() / imageScale, Image.SCALE_SMOOTH);
+		double scale = (width + 0.0) / image.getIconWidth();
+		int height = (int)(scale * image.getIconHeight());
+		Image scaled = image.getImage().getScaledInstance(width, 
+				height, Image.SCALE_SMOOTH);
 		
 		image = new ImageIcon(scaled);	
 	}
