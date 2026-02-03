@@ -38,7 +38,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		// establishes the size of the board and blocks based on block width
 		width = 106; // size of Blocks in px. Width = height, 106 = default
 		background = new Background(width * 500/106); // change numerator of fraction for board size, 500 = default
-		buffer = (int)(width * 14/106); // change numerator of fraction, 14 = default
+		buffer = (int)(width * 15/106); // change numerator of fraction, 15 = default
 		
 		// establishes the beginning.
 		score = 0;
