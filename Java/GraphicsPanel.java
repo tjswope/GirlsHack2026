@@ -148,6 +148,8 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		if (!isRunning) {
 			Timer.stop();
 			addRandomBlock();
+			direction[0] = 0;
+			direction[1] = 0;
 		}
 		this.repaint();
 	}
