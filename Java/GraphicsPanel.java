@@ -88,7 +88,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		
 		// draw all the blocks
 		for (int r = 0; r < board.length; r++) {
-			for (int c = 0; c < board[r].length; c++) {
+			for (int c = 0; c < board[r].length; c++) { 
 				if (cBoard[r][c] != null) cBoard[r][c].draw(g2, this); // draw combining blocks first
 				if (board[r][c] != null) board[r][c].draw(g2, this);
 			}
@@ -124,7 +124,6 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 						&& cBoard[r][c].getX() == (buffer + (width + buffer) * c) 
 						&& cBoard[r][c].getY() == (buffer + (width + buffer) * r)) {
 					// if the block exists, is moving, is colliding, and is in the right location
-					System.out.println("Combined");
 					cBoard[r][c].setMoving(false);
 					board[r][c].doubleValue(); // technically should set combined = false, but just in case:
 					score += board[r][c].getValue();
@@ -316,16 +315,6 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		board[add[0]][add[1]] = new Block(buffer + add[1] * (width + buffer), buffer + add[0] * (width + buffer), value, width);
 	}
 	
-	public void printBoard() {
-		for (int r = 0; r < board.length; r++) {
-			for (int c = 0; c < board[r].length; c++) {
-				if (board[r][c] != null) System.out.print(board[r][c].getValue() + " ");
-				else System.out.print(0 + " ");
-			}
-			System.out.println("");
-		}
-		System.out.println("");
-	}
 	// method: keyPressed()
 	// description: This method is called when a key is pressed. You can determine which key is pressed using the
 	//				KeyEvent object.  For example if(e.getKeyCode() == KeyEvent.VK_LEFT) would test to see if
@@ -337,25 +326,21 @@ public class GraphicsPanel extends JPanel implements KeyListener{
         	direction[0] = -1;
 			move(1);
 			Timer.start();
-			printBoard();
         }
         else if (keyCode == KeyEvent.VK_DOWN && !Timer.isRunning()) {
         	direction[0] = 1;
 			move(2);
 			Timer.start();
-			printBoard();
         }
         else if (keyCode == KeyEvent.VK_LEFT && !Timer.isRunning()) {
         	direction[1] = -1;
 			move(3);
 			Timer.start();
-			printBoard();
         }
         else if (keyCode == KeyEvent.VK_RIGHT && !Timer.isRunning()) {
         	direction[1] = 1;
 			move(4);
 			Timer.start();
-			printBoard();
         }
 	}
 	@Override public void keyTyped(KeyEvent e) {}
