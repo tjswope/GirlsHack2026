@@ -34,7 +34,6 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	private int width; 
 	private int buffer;
 	private Background background;	// background
-	private int test;
 	
 	public GraphicsPanel(){
 		// establishes the size of the board and blocks based on block width
@@ -78,20 +77,22 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		
 		// draws the background of the video game
 		background.draw(this, g);
-		test = 0;
 		
 		//draw words, first sets font, then color
 		Font stringFont = new Font("SansSerif", Font.PLAIN, 30);
 	    g.setFont(stringFont);
 		g.setColor(Color.BLACK);
 		// prints the score of the player (based on how many meteors they shoot)
-		g.drawString("" + score + ", test = " + test, 250, 529);
+		g.drawString("" + score, 250, 529);
 		
 		
 		// draw all the blocks
 		for (int r = 0; r < board.length; r++) {
 			for (int c = 0; c < board[r].length; c++) {
-				if (cBoard[r][c] != null) cBoard[r][c].draw(g2, this); // draw combining blocks first
+				if (cBoard[r][c] != null) {
+					cBoard[r][c].draw(g2, this); // draw combining blocks first
+					g.drawString("S", cBoard[r][c].getX(), cBoard[r][c].getY());
+				}
 				if (board[r][c] != null) board[r][c].draw(g2, this);
 			}
 		}
@@ -112,27 +113,27 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 						&& board[r][c].getMoving() 
 						&& (board[r][c].getX() != (buffer + (width + buffer) * c) 
 						|| board[r][c].getY() != (buffer + (width + buffer) * r))) {
-					// if the block exists, is moving, isn't in the right position
+					// if the block exists, is moving, isn't colliding, isn't in the right position
 					// one space moved = 121 px, 11 * 11
 					board[r][c].setX(board[r][c].getX() + direction[1] * 11);
 					board[r][c].setY(board[r][c].getY() + direction[0] * 11);
 				} else if (board[r][c] != null 
-						&& board[r][c].getMoving() 
 						&& board[r][c].getCombined()
-						&& (cBoard[r][c].getX() != (buffer + (width + buffer) * c) 
-						|| cBoard[r][c].getY() != (buffer + (width + buffer) * r))) {
-					// if the block exists, is moving, is colliding, and isn't in the right position 
+						&& (cBoard[r][c].getX() != board[r][c].getX() 
+						|| cBoard[r][c].getY() != board[r][c].getY())) {
+					// if the block exists, is colliding, and isn't in the right position 
 					cBoard[r][c].setX(board[r][c].getX() + direction[1] * 11);
 					cBoard[r][c].setY(board[r][c].getY() + direction[0] * 11);
+					System.out.println("Shadow " + r + ", " + c + " x: " + cBoard[r][c].getX() + ", y: " + cBoard[r][c].getY());
+					System.out.println("Real " + r + ", " + c + " x: " + board[r][c].getX() + ", y: " + board[r][c].getY());
 				} else if (board[r][c] != null 
-						&& board[r][c].getMoving() 
 						&& board[r][c].getCombined()
 						&& cBoard[r][c].getX() == (buffer + (width + buffer) * c) 
 						&& cBoard[r][c].getY() == (buffer + (width + buffer) * r)) {
 					// if the block exists, is moving, is colliding, and is in the right location
-					board[r][c].setMoving(false);
+					System.out.println("Combined");
+					cBoard[r][c].setMoving(false);
 					board[r][c].doubleValue(); // technically should set combined = false, but just in case:
-					board[r][c].setCombined(false);
 					score += board[r][c].getValue();
 					cBoard[r][c] = null;
 				} else if (board[r][c] != null 
@@ -150,6 +151,11 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 			addRandomBlock();
 			direction[0] = 0;
 			direction[1] = 0;
+			for (int r = 0; r < board.length; r++) {
+				for (int c = 0; c < board[r].length; c++) {
+					if (board[r][c] != null) board[r][c].setCombined(false);
+				}
+			}
 		}
 		this.repaint();
 	}
@@ -173,10 +179,11 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 								&& board[endRow + direction[0]][c] != null 
 								&& board[endRow + direction[0]][c].getValue() == board[r][c].getValue() 
 								&& !board[endRow + direction[0]][c].getCombined()) { // collision
-							// collision
+							// if block can move up, and there is a block above it, and the block above it has = value & hasn't been combined.
 							board[endRow + direction[0]][c].setCombined(true);
-							board[endRow + direction[0]][c].setMoving(true);
+							board[r][c].setMoving(true);
 							cBoard[endRow + direction[0]][c] = board[r][c]; // sets shadow block so that it can move
+							board[r][c] = null;
 						} else if (endRow != r) { // no collision
 							// block is moving
 							board[r][c].setMoving(true);
@@ -204,8 +211,9 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 								&& !board[endRow + direction[0]][c].getCombined()) { // collision
 							// collision
 							board[endRow + direction[0]][c].setCombined(true);
-							board[endRow + direction[0]][c].setMoving(true);
+							board[r][c].setMoving(true);
 							cBoard[endRow + direction[0]][c] = board[r][c]; // sets shadow block so that it can move
+							board[r][c] = null;
 						} else if (endRow != r) { // no collision
 							// block is moving
 							board[r][c].setMoving(true);
@@ -233,8 +241,9 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 								&& !board[r][endCol + direction[1]].getCombined()) { // collision
 							// collision
 							board[r][endCol + direction[1]].setCombined(true);
-							board[r][endCol + direction[1]].setMoving(true);
+							board[r][c].setMoving(true);
 							cBoard[r][endCol + direction[1]] = board[r][c]; // sets shadow block so that it can move
+							board[r][c] = null;
 						} else if (endCol != c) { // no collision
 							// block is moving
 							board[r][c].setMoving(true);
@@ -262,8 +271,9 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 								&& !board[r][endCol + direction[1]].getCombined()) { // collision
 							// collision
 							board[r][endCol + direction[1]].setCombined(true);
-							board[r][endCol + direction[1]].setMoving(true);
+							board[r][c].setMoving(true);
 							cBoard[r][endCol + direction[1]] = board[r][c]; // sets shadow block so that it can move
+							board[r][c] = null;
 						} else if (endCol != c) { // no collision
 							// block is moving
 							board[r][c].setMoving(true);
@@ -321,6 +331,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 			}
 			System.out.println("");
 		}
+		System.out.println("");
 	}
 	// method: keyPressed()
 	// description: This method is called when a key is pressed. You can determine which key is pressed using the
@@ -332,28 +343,24 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		if (keyCode == KeyEvent.VK_UP && !Timer.isRunning()) {
         	direction[0] = -1;
 			move(1);
-			System.out.println("Timer started");
 			Timer.start();
 			printBoard();
         }
         else if (keyCode == KeyEvent.VK_DOWN && !Timer.isRunning()) {
         	direction[0] = 1;
 			move(2);
-			System.out.println("Timer started");
 			Timer.start();
 			printBoard();
         }
         else if (keyCode == KeyEvent.VK_LEFT && !Timer.isRunning()) {
         	direction[1] = -1;
 			move(3);
-			System.out.println("Timer started");
 			Timer.start();
 			printBoard();
         }
         else if (keyCode == KeyEvent.VK_RIGHT && !Timer.isRunning()) {
         	direction[1] = 1;
 			move(4);
-			System.out.println("Timer started");
 			Timer.start();
 			printBoard();
         }
