@@ -89,10 +89,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		// draw all the blocks
 		for (int r = 0; r < board.length; r++) {
 			for (int c = 0; c < board[r].length; c++) {
-				if (cBoard[r][c] != null) {
-					cBoard[r][c].draw(g2, this); // draw combining blocks first
-					g.drawString("S", cBoard[r][c].getX(), cBoard[r][c].getY());
-				}
+				if (cBoard[r][c] != null) cBoard[r][c].draw(g2, this); // draw combining blocks first
 				if (board[r][c] != null) board[r][c].draw(g2, this);
 			}
 		}
@@ -108,7 +105,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		boolean isRunning = false;
 		for (int r = 0; r < board.length; r++) {
 			for (int c = 0; c < board[r].length; c++) {
-				if (board[r][c] != null && board[r][c].getMoving()) isRunning = true;
+				if ((board[r][c] != null && board[r][c].getMoving()) || cBoard[r][c] != null) isRunning = true;
 				if (board[r][c] != null 
 						&& board[r][c].getMoving() 
 						&& (board[r][c].getX() != (buffer + (width + buffer) * c) 
@@ -117,17 +114,13 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 					// one space moved = 121 px, 11 * 11
 					board[r][c].setX(board[r][c].getX() + direction[1] * 11);
 					board[r][c].setY(board[r][c].getY() + direction[0] * 11);
-				} else if (board[r][c] != null 
-						&& board[r][c].getCombined()
+				} else if (cBoard[r][c] != null 
 						&& (cBoard[r][c].getX() != board[r][c].getX() 
 						|| cBoard[r][c].getY() != board[r][c].getY())) {
 					// if the block exists, is colliding, and isn't in the right position 
-					cBoard[r][c].setX(board[r][c].getX() + direction[1] * 11);
-					cBoard[r][c].setY(board[r][c].getY() + direction[0] * 11);
-					System.out.println("Shadow " + r + ", " + c + " x: " + cBoard[r][c].getX() + ", y: " + cBoard[r][c].getY());
-					System.out.println("Real " + r + ", " + c + " x: " + board[r][c].getX() + ", y: " + board[r][c].getY());
-				} else if (board[r][c] != null 
-						&& board[r][c].getCombined()
+					cBoard[r][c].setX(cBoard[r][c].getX() + direction[1] * 11);
+					cBoard[r][c].setY(cBoard[r][c].getY() + direction[0] * 11);
+				} else if (cBoard[r][c] != null
 						&& cBoard[r][c].getX() == (buffer + (width + buffer) * c) 
 						&& cBoard[r][c].getY() == (buffer + (width + buffer) * r)) {
 					// if the block exists, is moving, is colliding, and is in the right location
