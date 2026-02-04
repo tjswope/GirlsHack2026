@@ -57,7 +57,6 @@ public class Block extends Item {
     
     public void setMoving(boolean moving) {
     	this.moving = moving;
-    	System.out.println("Is moving");
     }
     
     public boolean getMoving() {

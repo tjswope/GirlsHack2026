@@ -4,11 +4,9 @@
 // Description: This class is the main class for this project.  It extends the Jpanel class and will be drawn on
 // 				on the JPanel in the GraphicsMain class.
 //
-// Edited by: Jacqueline Bellaria, Jessie Liao, Nathaniel Gao, Yicheng Long
-// Date: 3/11/2025
-// Description: Main class for the game, Dino Doom. A player pilots a dinosaur to destroy as many meteors as possible, 
-//              all while avoiding getting hit by the meteors. The dinosaur also has to eat pigs to replenish it's hunger,
-//              or else it will starve to death.
+// Edited by: Jacqueline, Valentina, Lucy, Ellie
+// Date: 01/30/2025
+// Description: Main class for the game, 2048. 
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -24,39 +22,35 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 public class GraphicsPanel extends JPanel implements KeyListener{
-	private Timer Timer;					// The bTimer is used to move objects at a consistent bTime interval.
+	private Timer Timer;					// The Timer is used to move objects at a consistent bTime interval.
 	
 	private int score; // score for how many meteors destroyed
 	private int moves;
-	private int scale; 
 	private int[] direction; // direction that blocks are moving
-	private int[] start; // indicating starting row/column that must move first
 	private Block[][] board;
+	private Block[][] cBoard; // board with the blocks that are combining
 	
+	private int width; 
+	private int buffer;
 	private Background background;	// background
 	
-	
-	
-	private boolean gameOver; // if the game is over
-	
-	
 	public GraphicsPanel(){
-		background = new DesertBackground();
+		// establishes the size of the board and blocks based on block width
+		width = 106; // size of Blocks in px. Width = height, 106 = default
+		background = new Background(width * 500/106); // change numerator of fraction for board size, 500 = default
+		buffer = (int)(width * 15/106); // change numerator of fraction, 15 = default
+		
 		// establishes the beginning.
 		score = 0;
 		moves = 0;
 		direction = new int[2];
-		start = new int[2];
 		board = new Block[4][4];
+		cBoard = new Block[4][4];
 		// initialize initial board here -> 2 random blocks
 		addRandomBlock();
 		addRandomBlock();
 		
-		// TEST
-		//board[2][2] = new Block(14 + 2 * 122, 14 + 2 * 122, 2, 1);
-		// TEST
 		
-		scale = 1; // size of board / Blocks
 		
 		// This line of code sets the dimension of the panel equal to the dimensions
 		// of the background image.
@@ -70,8 +64,6 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		this.setFocusable(true);					     // for keylistener
 		this.addKeyListener(this);
 	
-	    
-	    gameOver = false;
 	}
 	
 	// method: paintComponent
@@ -85,21 +77,17 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		// draws the background of the video game
 		background.draw(this, g);
 		
-		
 		//draw words, first sets font, then color
-		Font stringFont = new Font( "SansSerif", Font.BOLD, 20 );
+		Font stringFont = new Font("SansSerif", Font.PLAIN, 30);
 	    g.setFont(stringFont);
 		g.setColor(Color.BLACK);
 		// prints the score of the player (based on how many meteors they shoot)
-		g.drawString("Score: " + score, 20, 55);
+		g.drawString("" + score, 250, 529);
 		
 		
 		// draw all the blocks
-		for (int r = 0; r < board.length; r++) {
-			for (int c = 0; c < board[r].length; c++) {
-				if (board[r][c] != null) board[r][c].draw(g2, this);
-			}
-		}
+		// loop through double for loop, draw cBoard first (remember null pointer exception!!)
+		// (Block).draw(g2, this);
 		
 
 	}
@@ -108,90 +96,132 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	// description: This method is called by the clocklistener every 5 milliseconds.  You should update the coordinates
 	//				of one of your characters in this method so that it moves as bTime changes.  After you update the
 	//				coordinates you should repaint the panel.
-	public void clock(){
-		// step-by-step animation will occur here
+	public void clock() {
+		boolean isRunning = false;
+		
+		for (int r = 0; r < board.length; r++) {
+			for (int c = 0; c < board[r].length; c++) {
+				// keeps timer running if a block has to move (either a shadow block or regular block)
+				if ((board[r][c] != null && board[r][c].getMoving()) || cBoard[r][c] != null) isRunning = true;
+				
+				if (board[r][c] != null 
+						&& board[r][c].getMoving() 
+						&& (board[r][c].getX() != (buffer + (width + buffer) * c) 
+						|| board[r][c].getY() != (buffer + (width + buffer) * r))) {
+					// if the block exists, is moving, and isn't in the right position
+					// one space moved = 121 px, 11 * 11
+					board[r][c].setX(board[r][c].getX() + direction[1] * 11);
+					board[r][c].setY(board[r][c].getY() + direction[0] * 11);
+					
+				} else if (cBoard[r][c] != null 
+						&& (cBoard[r][c].getX() != board[r][c].getX() 
+						|| cBoard[r][c].getY() != board[r][c].getY())) {
+					// if the block exists, is colliding, and isn't in the right position 
+					// move the shadow block
+					cBoard[r][c].setX(cBoard[r][c].getX() + direction[1] * 11);
+					cBoard[r][c].setY(cBoard[r][c].getY() + direction[0] * 11);
+					
+				} else if (cBoard[r][c] != null
+						&& cBoard[r][c].getX() == (buffer + (width + buffer) * c) 
+						&& cBoard[r][c].getY() == (buffer + (width + buffer) * r)) {
+					// if the block exists, is moving, is colliding, and is in the right location
+					cBoard[r][c].setMoving(false);
+					board[r][c].doubleValue(); // technically should set combined = false, but just in case:
+					score += board[r][c].getValue();
+					cBoard[r][c] = null;
+					
+				} else if (board[r][c] != null 
+						&& board[r][c].getMoving() 
+						&& board[r][c].getX() == (buffer + (width + buffer) * c) 
+						&& board[r][c].getY() == (buffer + (width + buffer) * r)) {
+					// if the block exists, is moving, isn't colliding, and is in the right location
+					board[r][c].setMoving(false);
+				}
+			}
+		}
+		
+		// if no block is moving
+		if (!isRunning) {
+			// stop the timer, add a block, set direction to [0,0], set all combined to false (double for loop)
+			Timer.stop();
+			
+		}
+		
 		this.repaint();
 	}
 	
+	// Method: move
+	// Description: the logic portion of how the blocks move. Will move all the blocks and collide as needed.
+	// Parameters: int d, the direction.
+	// Return: N/A
 	public void move(int d) {
 		if (d == 1) { // up
 			for (int r = 1; r < board.length; r++) { // looping through rows 1, 2, & 3
 				for (int c = 0; c < board[r].length; c++) {
 					if (board[r][c] != null) {
-						// move the blocks until they collide with something, stop at a different numbered block, or hit the walls
-						// if they collide, the formed block can't collide with anything else
-						// score doubles during collision
+						int endRow = r;
+						
+						while (endRow + direction[0] >= 0 && board[endRow + direction[0]][c] == null) {
+							endRow += direction[0]; // moves to empty spaces
+						}
+						
+						if (endRow + direction[0] >= 0 
+								&& board[endRow + direction[0]][c] != null 
+								&& board[endRow + direction[0]][c].getValue() == board[r][c].getValue() 
+								&& !board[endRow + direction[0]][c].getCombined()) { // collision
+							// if block can move up, and there is a block above it, and the block above it has = value & hasn't been combined.
+							board[endRow + direction[0]][c].setCombined(true);
+							board[r][c].setMoving(true);
+							cBoard[endRow + direction[0]][c] = board[r][c]; // sets shadow block so that it can move
+							board[r][c] = null;
+						} else if (endRow != r) { // no collision
+							// block is moving
+							board[r][c].setMoving(true);
+							// block is at new position on array
+							board[endRow][c] = board[r][c];
+							// old position is empty
+							board[r][c] = null;
+						}
 					}
 				}
 			}
 		} else if (d == 2) { // down
-			for (int r = board.length - 2; r >= 0; r--) { // looping through rows 2, 1, & 0
-				for (int c = 0; c < board[r].length; c++) {
-					if (board[r][c] != null) {
-						// move the blocks until they collide with something, stop at a different numbered block, or hit the walls
-						// if they collide, the formed block can't collide with anything else
-						// score doubles during collision
-					}
-				}
-			}
+			// looping through rows 2, 1, & 0
+			// looks roughly identical to above code (d == 1)
 		} else if (d == 3) { // left
-			for (int c = 1; c < board[0].length; c++) { // looping through columns 1, 2, & 3
-				for (int r = 0; r < board.length; r++) {
-					if (board[r][c] != null) {
-						// move the blocks until they collide with something, stop at a different numbered block, or hit the walls
-						// if they collide, the formed block can't collide with anything else
-						// score doubles during collision
-					}
-				}
-			}
+			// looping through columns 1, 2, & 3
+			// looks roughly identical to above code (d == 1)
 		} else if (d == 4) { // right
-			for (int c = board[1].length - 2; c >= 0; c--) { // looping through columns 2, 1, & 0
-				for (int r = 0; r < board.length; r++) {
-					if (board[r][c] != null) {
-						// move the blocks until they collide with something, stop at a different numbered block, or hit the walls
-						// if they collide, the formed block can't collide with anything else
-						// score doubles during collision
-					}
-				}
-			}
+			// looping through columns 2, 1, & 0
+			// looks roughly identical to above code (d == 1)
 		}
 		
-		for (int r = 0; r < board.length; r++) { // resetting combined boolean for all blocks.
-			for (int c = 0; c < board[r].length; c++) {
-				if (board[r][c] != null && board[r][c].getCombined()) {
-					board[r][c].setCombined(false);
-				}
-			}
-		}
-		
-		moves++;
-		addRandomBlock();
-		
-		repaint();
+		moves++; // optional, but fun!
 	}
 	
+	// Method: addRandomBlock
+	// Description: finds all the empty spaces in the array and randomly adds a block to one of the empty spaces. 
+	// 				The block has 90% chance of being a 2, 10% chance of being a 4.
+	// Parameters: N/A
+	// Return: N/A
 	public void addRandomBlock() {
 		// create 2d ArrayList of empty spaces on board
-		ArrayList<int[]> empty = new ArrayList<>();
 		
 		// adds empty spaces to ArrayList
-		// loop through the board and add the null spaces to empty
-		
 		
 		// game over code
+		// empty = the ArrayList
 		if (empty.isEmpty()) {
-			gameOver = true;
 			System.exit(0);
 		}
 		
-		// add new block
-		int[] add = empty.get((int) (Math.random() * empty.size()));
-		int value = 0;
+		// select random block from empty list
 		
-		// set value of new block, 2 = 90%, 4 = 10%
-		value = 2;
+		// randomly select value of block: 2 = 90%, 4 = 10%
 		
-		board[add[0]][add[1]] = new Block(14 + add[1] * 122, 14 + add[0] * 122, value, 1);
+		// blocks height & width = 106 px, padding of 15 px.
+		// add block to board
+		// new Block(buffer + column * (width + buffer), buffer + row * (width + buffer), value, width);
 	}
 	
 	// method: keyPressed()
@@ -201,31 +231,14 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	// parameters: KeyEvent e
 	@Override public void keyPressed(KeyEvent e) {
 		int keyCode = e.getKeyCode();
-		if (keyCode == KeyEvent.VK_UP) {
+		// can only hit a key if the timer isn't running
+		if (keyCode == KeyEvent.VK_UP && !Timer.isRunning()) {
+			// set direction, call move, start timer.
         	direction[0] = -1;
-        	start[0] = 1;
-			System.out.println("up");
 			move(1);
+			Timer.start();
         }
-        else if (keyCode == KeyEvent.VK_DOWN) {
-        	direction[0] = 1;
-        	start[0] = 2;
-			System.out.println("down");
-			move(2);
-        }
-        else if (keyCode == KeyEvent.VK_LEFT) {
-        	direction[1] = -1;
-        	start[1] = 1;
-			System.out.println("left");
-			move(3);
-        }
-        else if (keyCode == KeyEvent.VK_RIGHT) {
-        	direction[1] = 1;
-        	start[1] = 2;
-			System.out.println("right");
-			move(4);
-        }
-		
+        // code the other keys as else if statements
 	}
 	@Override public void keyTyped(KeyEvent e) {}
 	@Override public void keyReleased(KeyEvent e) {}
