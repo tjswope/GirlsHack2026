@@ -101,7 +101,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	// description: This method is called by the clocklistener every 5 milliseconds.  You should update the coordinates
 	//				of one of your characters in this method so that it moves as bTime changes.  After you update the
 	//				coordinates you should repaint the panel.
-	public void clock(){
+	public void clock() {
 		boolean isRunning = false;
 		
 		for (int r = 0; r < board.length; r++) {
@@ -315,12 +315,13 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 			System.exit(0);
 		}
 		
-		// add new block
+		// select random block from empty list
 		int[] add = empty.get((int) (Math.random() * empty.size()));
+		// randomly select value of block: 2 = 90%, 4 = 10%
 		int value = 0;
 		if (Math.random() >= 0.9) value = 4;
 		else value = 2;
-		// blocks height & width = 106 px, padding of 14 px.
+		// blocks height & width = 106 px, padding of 15 px.
 		board[add[0]][add[1]] = new Block(buffer + add[1] * (width + buffer), buffer + add[0] * (width + buffer), value, width);
 	}
 	
