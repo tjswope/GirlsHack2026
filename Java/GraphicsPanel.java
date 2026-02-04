@@ -103,23 +103,29 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	//				coordinates you should repaint the panel.
 	public void clock(){
 		boolean isRunning = false;
+		
 		for (int r = 0; r < board.length; r++) {
 			for (int c = 0; c < board[r].length; c++) {
+				// keeps timer running if a block has to move (either a shadow block or regular block)
 				if ((board[r][c] != null && board[r][c].getMoving()) || cBoard[r][c] != null) isRunning = true;
+				
 				if (board[r][c] != null 
 						&& board[r][c].getMoving() 
 						&& (board[r][c].getX() != (buffer + (width + buffer) * c) 
 						|| board[r][c].getY() != (buffer + (width + buffer) * r))) {
-					// if the block exists, is moving, isn't colliding, isn't in the right position
+					// if the block exists, is moving, and isn't in the right position
 					// one space moved = 121 px, 11 * 11
 					board[r][c].setX(board[r][c].getX() + direction[1] * 11);
 					board[r][c].setY(board[r][c].getY() + direction[0] * 11);
+					
 				} else if (cBoard[r][c] != null 
 						&& (cBoard[r][c].getX() != board[r][c].getX() 
 						|| cBoard[r][c].getY() != board[r][c].getY())) {
 					// if the block exists, is colliding, and isn't in the right position 
+					// move the shadow block
 					cBoard[r][c].setX(cBoard[r][c].getX() + direction[1] * 11);
 					cBoard[r][c].setY(cBoard[r][c].getY() + direction[0] * 11);
+					
 				} else if (cBoard[r][c] != null
 						&& cBoard[r][c].getX() == (buffer + (width + buffer) * c) 
 						&& cBoard[r][c].getY() == (buffer + (width + buffer) * r)) {
@@ -128,6 +134,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 					board[r][c].doubleValue(); // technically should set combined = false, but just in case:
 					score += board[r][c].getValue();
 					cBoard[r][c] = null;
+					
 				} else if (board[r][c] != null 
 						&& board[r][c].getMoving() 
 						&& board[r][c].getX() == (buffer + (width + buffer) * c) 
@@ -138,7 +145,9 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 			}
 		}
 		
+		// if no block is moving
 		if (!isRunning) {
+			// stop the timer, add a block, set direction to 0, set all combined to false
 			Timer.stop();
 			addRandomBlock();
 			direction[0] = 0;
@@ -322,22 +331,27 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	// parameters: KeyEvent e
 	@Override public void keyPressed(KeyEvent e) {
 		int keyCode = e.getKeyCode();
+		// can only hit a key if the timer isn't running
 		if (keyCode == KeyEvent.VK_UP && !Timer.isRunning()) {
+			// set direction, call move, start timer.
         	direction[0] = -1;
 			move(1);
 			Timer.start();
         }
         else if (keyCode == KeyEvent.VK_DOWN && !Timer.isRunning()) {
+        	// set direction, call move, start timer.
         	direction[0] = 1;
 			move(2);
 			Timer.start();
         }
         else if (keyCode == KeyEvent.VK_LEFT && !Timer.isRunning()) {
+        	// set direction, call move, start timer.
         	direction[1] = -1;
 			move(3);
 			Timer.start();
         }
         else if (keyCode == KeyEvent.VK_RIGHT && !Timer.isRunning()) {
+        	// set direction, call move, start timer.
         	direction[1] = 1;
 			move(4);
 			Timer.start();
