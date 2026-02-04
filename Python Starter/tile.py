@@ -2,6 +2,7 @@ import os
 import pygame
 import math
 from main import *
+
 class Tile:
     def __init__(self, val, row, col):
         self.value = val
@@ -10,13 +11,17 @@ class Tile:
         self.x = col * RECT_WIDTH
         self.y = row * RECT_HEIGHT
         self.image = pygame.transform.scale(pygame.image.load(os.path.join("images", f"{self.value}.png")), (RECT_WIDTH, RECT_HEIGHT))
+
     def draw(self, window):
         window.blit(self.image, (self.x, self.y))
+
     def update_image(self):
         self.image = pygame.transform.scale(pygame.image.load(os.path.join("images", f"{self.value}.png")),(RECT_WIDTH, RECT_HEIGHT))
+
     def move(self, dist):
         self.x += dist[0]
         self.y += dist[1]
+
     def set_pos(self, round=False):
         if round:
             #ceil means you round up regardless

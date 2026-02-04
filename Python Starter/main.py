@@ -36,6 +36,7 @@ def draw(window, tiles):
     for row in range(1, ROW):
         y = row * RECT_HEIGHT
         pygame.draw.line(window, OL_COLOR, (0, y), (WIDTH, y), OL_THICKNESS)
+
     for col in range(1, COL):
         x = col * RECT_WIDTH
         pygame.draw.line(window, OL_COLOR, (x, 0), (x, HEIGHT), OL_THICKNESS)
@@ -54,8 +55,10 @@ def update_tiles(window, tiles, sorted_tiles):
     for r in range(ROW):
         for c in range(COL):
             tiles[r][c] = None
+
     for tile in sorted_tiles:
         tiles[tile.row][tile.col] = tile
+
     draw(window, tiles)
 
 #checks to see if the board is full and game is over
@@ -72,16 +75,20 @@ def end_tiles(tiles):
 #as opposed to the row value or value value
 def sortfunc_col(tile):
     return tile.col
+
 def sortfunc_row(tile):
     return tile.row
 
 #determines whether or not the tile is at the boundary so it can't move
 def bounds_left(tile):
     return tile.col == 0
+
 def bounds_right(tile):
     return tile.col == COL - 1
+
 def bounds_up(tile):
     return tile.row == 0
+
 def bounds_down(tile):
     return tile.row == ROW - 1
 
@@ -89,10 +96,13 @@ def bounds_down(tile):
 #if we are moving to the left, it would get the tile to the left of the tile we are moving
 def next_left(tile, tiles):
     return tiles[tile.row][tile.col - 1]
+
 def next_right(tile, tiles):
     return tiles[tile.row][tile.col + 1]
+
 def next_up(tile, tiles):
     return tiles[tile.row - 1][tile.col]
+
 def next_down(tile, tiles):
     return tiles[tile.row + 1][tile.col]
 
@@ -101,10 +111,13 @@ def next_down(tile, tiles):
 #to merge the bounds to stop is going to be the leftmost side of the tile
 def merge_check_left(tile, next_tile):
     return tile.x > next_tile.x + VEL
+
 def merge_check_right(tile, next_tile):
     return tile.x < next_tile.x - VEL
+
 def merge_check_up(tile, next_tile):
     return tile.y > next_tile.y + VEL
+
 def merge_check_down(tile, next_tile):
     return tile.y < next_tile.y - VEL
 
@@ -113,10 +126,13 @@ def merge_check_down(tile, next_tile):
 #boundary to stop is different, it's the very right of the tile, not the left
 def move_check_left(tile, next_tile):
     return tile.x > next_tile.x + RECT_WIDTH + VEL
+
 def move_check_right(tile, next_tile):
     return tile.x + RECT_WIDTH + VEL < next_tile.x
+
 def move_check_up(tile, next_tile):
     return tile.y > next_tile.y + RECT_HEIGHT + VEL
+
 def move_check_down(tile, next_tile):
     return tile.y + RECT_HEIGHT + VEL < next_tile.y
 
@@ -255,5 +271,6 @@ def main(window):
                     move_tiles(window, tiles, clock, "down")
         draw(window, tiles)
     pygame.quit()
+
 if __name__ == "__main__":
     main(WINDOW)
