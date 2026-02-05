@@ -9,7 +9,7 @@ public class Block extends Item {
 	private boolean moving;
 	
 	public Block(int x_coordinate, int y_coordinate, int value, int width) {
-		super(x_coordinate, y_coordinate, "images/" + value + ".png/", width);
+		super(x_coordinate, y_coordinate, "images/" + value + ".png", width);
 		this.value = value;
 		this.width = width;
 		this.combined = false;
@@ -42,7 +42,7 @@ public class Block extends Item {
     	return combined;
     }
     
-    // default width & height = 106 px
+    // current rendered icon size = 106 px
     public int getWidth() {
     	return image.getIconWidth();
     }
@@ -58,7 +58,6 @@ public class Block extends Item {
     
     public void setMoving(boolean moving) {
     	this.moving = moving;
-    	System.out.println("Is moving");
     }
     
     public boolean getMoving() {

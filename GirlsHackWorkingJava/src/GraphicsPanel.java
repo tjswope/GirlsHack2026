@@ -1,4 +1,3 @@
-
 // Class: GraphicsPanel
 // Written by: Mr. Swope
 // Date: 1/27/2020
@@ -8,26 +7,22 @@
 // Edited by: Jacqueline, Valentina, Lucy, Ellie
 // Date: 01/30/2025
 // Description: Main class for the game, 2048. 
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 public class GraphicsPanel extends JPanel implements KeyListener{
-	private Timer Timer;					// The Timer is used to move objects at a consistent bTime interval.
+	private Timer timer;					// The timer is used to move objects at a consistent time interval.
 	
-	private int score; // score for how many meteors destroyed
+	private int score; 
 	private int moves;
-	private int[] direction; // direction that blocks are moving
+	private int[] direction; // direction that blocks are moving, [0]=dy, [1]=dx
 	private Block[][] board;
 	private Block[][] cBoard; // board with the blocks that are combining
 	
@@ -57,11 +52,11 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		// of the background image.
 		setPreferredSize(new Dimension(background.getWidth(),background.getHeight()));									
 		
-		Timer = new Timer(5, new ClockListener(this));   // This object will call the ClockListener's
+		timer = new Timer(5, new ClockListener(this));   // This object will call the ClockListener's
 													 	 // action performed method every 5 milliseconds once the
-													 	 // bTimer is started. You can change how frequently this
+													 	 // timer is started. You can change how frequently this
 													 	 // method is called by changing the first parameter.
-		//Timer.start();
+		//timer.start();
 		this.setFocusable(true);					     // for keylistener
 		this.addKeyListener(this);
 	
@@ -82,7 +77,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		Font stringFont = new Font("SansSerif", Font.PLAIN, 30);
 	    g.setFont(stringFont);
 		g.setColor(Color.BLACK);
-		// prints the score of the player (based on how many meteors they shoot)
+		// prints the score of the player 
 		g.drawString("" + score, 250, 529);
 		
 		
@@ -99,7 +94,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	
 	// method:clock
 	// description: This method is called by the clocklistener every 5 milliseconds.  You should update the coordinates
-	//				of one of your characters in this method so that it moves as bTime changes.  After you update the
+	//				of one of your characters in this method so that it moves as time changes.  After you update the
 	//				coordinates you should repaint the panel.
 	public void clock(){
 		boolean isRunning = false;
@@ -139,7 +134,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		}
 		
 		if (!isRunning) {
-			Timer.stop();
+			timer.stop();
 			addRandomBlock();
 			direction[0] = 0;
 			direction[1] = 0;
@@ -253,7 +248,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 					if (board[r][c] != null) {
 						int endCol = c;
 						
-						while (endCol + direction[1] < board[c].length && board[r][endCol + direction[1]] == null) {
+						while (endCol + direction[1] < board[r].length && board[r][endCol + direction[1]] == null) {
 							endCol += direction[1]; // moves to empty spaces
 						}
 						
@@ -322,25 +317,25 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	// parameters: KeyEvent e
 	@Override public void keyPressed(KeyEvent e) {
 		int keyCode = e.getKeyCode();
-		if (keyCode == KeyEvent.VK_UP && !Timer.isRunning()) {
+		if (keyCode == KeyEvent.VK_UP && !timer.isRunning()) {
         	direction[0] = -1;
 			move(1);
-			Timer.start();
+			timer.start();
         }
-        else if (keyCode == KeyEvent.VK_DOWN && !Timer.isRunning()) {
+        else if (keyCode == KeyEvent.VK_DOWN && !timer.isRunning()) {
         	direction[0] = 1;
 			move(2);
-			Timer.start();
+			timer.start();
         }
-        else if (keyCode == KeyEvent.VK_LEFT && !Timer.isRunning()) {
+        else if (keyCode == KeyEvent.VK_LEFT && !timer.isRunning()) {
         	direction[1] = -1;
 			move(3);
-			Timer.start();
+			timer.start();
         }
-        else if (keyCode == KeyEvent.VK_RIGHT && !Timer.isRunning()) {
+        else if (keyCode == KeyEvent.VK_RIGHT && !timer.isRunning()) {
         	direction[1] = 1;
 			move(4);
-			Timer.start();
+			timer.start();
         }
 	}
 	@Override public void keyTyped(KeyEvent e) {}

@@ -8,15 +8,15 @@ import java.awt.event.ActionListener;
 
 public class ClockListener implements ActionListener {
 
-	GraphicsPanel f;
+	private final GraphicsPanel panel;
 
-	ClockListener(GraphicsPanel c)
+	public ClockListener(GraphicsPanel c)
 	{
-		f = c;
+		panel = c;
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		f.clock();
+		panel.clock();
 	}
 
 }

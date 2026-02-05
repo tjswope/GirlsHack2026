@@ -30,11 +30,6 @@ public class Item{
  
 	protected ImageIcon image;			// The ImageIcon is what is actually drawn on the Panel
 
-	// method: Default constructor - see packed constructors comments for a description of parameters.
-	public Item(){
-		this(200, 300, "images/forest/objects/Tree_2.png", 2);
-	}
-
 	// method: Item constructor
 	// description: Initialize a new Item object.
 	// parameters: x_coordinate - the initial x-coordinate for Character.
@@ -53,8 +48,8 @@ public class Item{
 	//             imageString - The image path for the image that you want to draw. Make sure that any images that
 	//                           you would like to draw are in your project and that you give the full path relative to 
 	//                           your project's src folder.
-	//             imageScale - imageScale is used to make the image bigger or smaller on the Panel. The bigger
-	// 						    the imageScale, the smaller the image will be.
+	//             width: the desired pixel width of the image after scaling (aspect ratio preserved)
+
 	public Item(int x_coordinate, int y_coordinate, String imageString, int width){
 
 		this.x_coordinate = x_coordinate;						// Initial coordinates for the Item.
@@ -89,12 +84,9 @@ public class Item{
 		}
 	}
 	
-	// method: getBounds
-	// description: This method will return the coordinates of a rectangle that would be drawn around the 
-	// 				Item's png.  This rectangle can be used to check to see if the Item bumps into 
-	//				another Item or Sprite on your panel. This method is called by the collision methods in Sprite 
-	//              and Item. You probably won't call this method directly.
-	// return: A Rectangle - This rectangle would be like drawing a rectangle around the Character's image.
+	// Method: changeScale
+	// Description: Rescales this item's image to a target width, preserving aspect ratio.
+	// Parameter: width - the desired pixel width to scale the image to.
 	public Rectangle getBounds(){
 		return new Rectangle(x_coordinate, y_coordinate, image.getIconWidth(), 
 				image.getIconHeight());
@@ -108,14 +100,14 @@ public class Item{
 	}
 	
 	// method: getX
-	// description:  This method will return the x-coordinate of the top left hand corner of the the image.
+	// description: This method will return the x-coordinate of the top left hand corner of the the image.
 	// return: int - the x-coordinate of the top left hand corner of the the image.
 	public int getX(){
 		return x_coordinate;
 	}
 
 	// method: getY
-	// description:  This method will return the y-coordinate of the top left hand corner of the the image.
+	// description: This method will return the y-coordinate of the top left hand corner of the the image.
 	// return: int - the y-coordinate of the top left hand corner of the the image.
 	public int getY(){
 		return y_coordinate;
@@ -124,7 +116,7 @@ public class Item{
 	
 	// method: move
 	// description: This method will modify the Item's x or y (or perhaps both) coordinates.  When the 
-	//				graphics panel is repainted the Item will then be drawn in it's new location.
+	// graphics panel is repainted the Item will then be drawn in it's new location.
 	// parameters: Component c - this is the Panel that the Item will be drawn on. You need this parameter so 
 	//            that you can figure out the dimensions and not go off of the panel when it moves.		   
 	public void move(Component c){
