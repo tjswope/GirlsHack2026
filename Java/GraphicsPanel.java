@@ -73,7 +73,6 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	//				This is the only place that you can draw objects.
 	// parameters: Graphics g - This object is used to draw your images onto the graphics panel.
 	public void paintComponent(Graphics g){
-		Graphics2D g2 = (Graphics2D) g;
 		
 		// draws the background of the video game
 		background.draw(this, g);
@@ -89,12 +88,10 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		// draw all the blocks
 		for (int r = 0; r < board.length; r++) {
 			for (int c = 0; c < board[r].length; c++) { 
-				if (cBoard[r][c] != null) cBoard[r][c].draw(g2, this); // draw combining blocks first
-				if (board[r][c] != null) board[r][c].draw(g2, this);
+				if (cBoard[r][c] != null) cBoard[r][c].draw(g, this); // draw combining blocks first
+				if (board[r][c] != null) board[r][c].draw(g, this);
 			}
 		}
-		
-
 	}
 	
 	// method:clock
