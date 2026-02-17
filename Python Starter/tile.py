@@ -1,7 +1,7 @@
 import os
 import pygame
 import math
-from main import *
+from settings import *
 
 class Tile:
     def __init__(self, val, row, col):
@@ -13,7 +13,7 @@ class Tile:
         self.image = pygame.transform.scale(pygame.image.load(os.path.join("images", f"{self.value}.png")), (RECT_WIDTH, RECT_HEIGHT))
 
     def draw(self, window):
-        window.blit(self.image, (self.x, self.y))
+        window.blit(self.image, (self.x, self.y+BOARD_Y))
 
     def update_image(self):
         self.image = pygame.transform.scale(pygame.image.load(os.path.join("images", f"{self.value}.png")),(RECT_WIDTH, RECT_HEIGHT))
@@ -32,3 +32,6 @@ class Tile:
             self.row = math.floor(self.y / RECT_HEIGHT)
             self.col = math.floor(self.x / RECT_WIDTH)
 
+        # Clamp to valid grid indices to avoid out-of-bounds neighbor lookups
+        self.row = max(0, min(self.row, ROW - 1))
+        self.col = max(0, min(self.col, COL - 1))
