@@ -1,0 +1,11 @@
+WIDTH, HEIGHT = 800, 800
+ROW, COL = 4, 4
+
+RECT_WIDTH = WIDTH // COL
+RECT_HEIGHT = HEIGHT // ROW
+
+HUD_HEIGHT = 90
+WINDOW_HEIGHT = HEIGHT + HUD_HEIGHT
+BOARD_Y = HUD_HEIGHT
+# Per-frame movement (pixels). Higher = faster animation.
+VEL = 40
