@@ -1,4 +1,3 @@
-
 // Class: GraphicsPanel
 // Written by: Mr. Swope
 // Date: 1/27/2020
@@ -73,6 +72,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	//				This is the only place that you can draw objects.
 	// parameters: Graphics g - This object is used to draw your images onto the graphics panel.
 	public void paintComponent(Graphics g){
+		Graphics2D g2 = (Graphics2D) g;
 		
 		// draws the background of the video game
 		background.draw(this, g);
@@ -86,12 +86,10 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		
 		
 		// draw all the blocks
-		for (int r = 0; r < board.length; r++) {
-			for (int c = 0; c < board[r].length; c++) { 
-				if (cBoard[r][c] != null) cBoard[r][c].draw(g, this); // draw combining blocks first
-				if (board[r][c] != null) board[r][c].draw(g, this);
-			}
-		}
+		// loop through double for loop, draw cBoard first (remember null pointer exception!!)
+		// (Block).draw(g2, this);
+		
+
 	}
 	
 	// method:clock
@@ -144,17 +142,11 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		
 		// if no block is moving
 		if (!isRunning) {
-			// stop the timer, add a block, set direction to 0, set all combined to false
+			// stop the timer, add a block, set direction to [0,0], set all combined to false (double for loop)
 			Timer.stop();
-			addRandomBlock();
-			direction[0] = 0;
-			direction[1] = 0;
-			for (int r = 0; r < board.length; r++) {
-				for (int c = 0; c < board[r].length; c++) {
-					if (board[r][c] != null) board[r][c].setCombined(false);
-				}
-			}
+			
 		}
+		
 		this.repaint();
 	}
 	
@@ -194,98 +186,17 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 				}
 			}
 		} else if (d == 2) { // down
-			for (int r = board.length - 2; r >= 0; r--) { // looping through rows 2, 1, & 0
-				for (int c = 0; c < board[r].length; c++) {
-					if (board[r][c] != null) {
-						int endRow = r;
-						
-						while (endRow + direction[0] < board.length && board[endRow + direction[0]][c] == null) {
-							endRow += direction[0]; // moves to empty spaces
-						}
-						
-						if (endRow + direction[0] < board.length 
-								&& board[endRow + direction[0]][c] != null 
-								&& board[endRow + direction[0]][c].getValue() == board[r][c].getValue() 
-								&& !board[endRow + direction[0]][c].getCombined()) { // collision
-							// collision
-							board[endRow + direction[0]][c].setCombined(true);
-							board[r][c].setMoving(true);
-							cBoard[endRow + direction[0]][c] = board[r][c]; // sets shadow block so that it can move
-							board[r][c] = null;
-						} else if (endRow != r) { // no collision
-							// block is moving
-							board[r][c].setMoving(true);
-							// block is at new position on array
-							board[endRow][c] = board[r][c];
-							// old position is empty
-							board[r][c] = null;
-						}
-					}
-				}
-			}
+			// looping through rows 2, 1, & 0
+			// looks roughly identical to above code (d == 1)
 		} else if (d == 3) { // left
-			for (int c = 1; c < board[0].length; c++) { // looping through columns 1, 2, & 3
-				for (int r = 0; r < board.length; r++) {
-					if (board[r][c] != null) {
-						int endCol = c;
-						
-						while (endCol + direction[1] >= 0 && board[r][endCol + direction[1]] == null) {
-							endCol += direction[1]; // moves to empty spaces
-						}
-						
-						if (endCol + direction[1] >= 0 
-								&& board[r][endCol + direction[1]] != null 
-								&& board[r][endCol + direction[1]].getValue() == board[r][c].getValue() 
-								&& !board[r][endCol + direction[1]].getCombined()) { // collision
-							// collision
-							board[r][endCol + direction[1]].setCombined(true);
-							board[r][c].setMoving(true);
-							cBoard[r][endCol + direction[1]] = board[r][c]; // sets shadow block so that it can move
-							board[r][c] = null;
-						} else if (endCol != c) { // no collision
-							// block is moving
-							board[r][c].setMoving(true);
-							// block is at new position on array
-							board[r][endCol] = board[r][c];
-							// old position is empty
-							board[r][c] = null;
-						}
-					}
-				}
-			}
+			// looping through columns 1, 2, & 3
+			// looks roughly identical to above code (d == 1)
 		} else if (d == 4) { // right
-			for (int c = board[1].length - 2; c >= 0; c--) { // looping through columns 2, 1, & 0
-				for (int r = 0; r < board.length; r++) {
-					if (board[r][c] != null) {
-						int endCol = c;
-						
-						while (endCol + direction[1] < board[c].length && board[r][endCol + direction[1]] == null) {
-							endCol += direction[1]; // moves to empty spaces
-						}
-						
-						if (endCol + direction[1] < board[r].length 
-								&& board[r][endCol + direction[1]] != null 
-								&& board[r][endCol + direction[1]].getValue() == board[r][c].getValue() 
-								&& !board[r][endCol + direction[1]].getCombined()) { // collision
-							// collision
-							board[r][endCol + direction[1]].setCombined(true);
-							board[r][c].setMoving(true);
-							cBoard[r][endCol + direction[1]] = board[r][c]; // sets shadow block so that it can move
-							board[r][c] = null;
-						} else if (endCol != c) { // no collision
-							// block is moving
-							board[r][c].setMoving(true);
-							// block is at new position on array
-							board[r][endCol] = board[r][c];
-							// old position is empty
-							board[r][c] = null;
-						}
-					}
-				}
-			}
+			// looping through columns 2, 1, & 0
+			// looks roughly identical to above code (d == 1)
 		}
 		
-		moves++;
+		moves++; // optional, but fun!
 	}
 	
 	// Method: addRandomBlock
@@ -295,31 +206,22 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	// Return: N/A
 	public void addRandomBlock() {
 		// create 2d ArrayList of empty spaces on board
-		ArrayList<int[]> empty = new ArrayList<>();
 		
 		// adds empty spaces to ArrayList
-		for (int r = 0; r < board.length; r++) {
-			for (int c = 0; c < board[r].length; c++) {
-				if (board[r][c] == null) {
-					int[] e = {r, c};
-					empty.add(e);
-				}
-			}
-		}
 		
 		// game over code
+		// empty = the ArrayList
 		if (empty.isEmpty()) {
 			System.exit(0);
 		}
 		
 		// select random block from empty list
-		int[] add = empty.get((int) (Math.random() * empty.size()));
+		
 		// randomly select value of block: 2 = 90%, 4 = 10%
-		int value = 0;
-		if (Math.random() >= 0.9) value = 4;
-		else value = 2;
+		
 		// blocks height & width = 106 px, padding of 15 px.
-		board[add[0]][add[1]] = new Block(buffer + add[1] * (width + buffer), buffer + add[0] * (width + buffer), value, width);
+		// add block to board
+		// new Block(buffer + column * (width + buffer), buffer + row * (width + buffer), value, width);
 	}
 	
 	// method: keyPressed()
@@ -336,24 +238,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 			move(1);
 			Timer.start();
         }
-        else if (keyCode == KeyEvent.VK_DOWN && !Timer.isRunning()) {
-        	// set direction, call move, start timer.
-        	direction[0] = 1;
-			move(2);
-			Timer.start();
-        }
-        else if (keyCode == KeyEvent.VK_LEFT && !Timer.isRunning()) {
-        	// set direction, call move, start timer.
-        	direction[1] = -1;
-			move(3);
-			Timer.start();
-        }
-        else if (keyCode == KeyEvent.VK_RIGHT && !Timer.isRunning()) {
-        	// set direction, call move, start timer.
-        	direction[1] = 1;
-			move(4);
-			Timer.start();
-        }
+        // code the other keys as else if statements
 	}
 	@Override public void keyTyped(KeyEvent e) {}
 	@Override public void keyReleased(KeyEvent e) {}

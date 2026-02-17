@@ -11,11 +11,11 @@ public class GraphicsMain extends JFrame{
 
 	public static void main(String[] args) {
 		GraphicsMain window = new GraphicsMain();
-	    JPanel root = new JPanel();
-	    root.add(new GraphicsPanel());  
+	    JPanel p = new JPanel();
+	    p.add(new GraphicsPanel());  
 	    window.setTitle("2048");
 	    window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	    window.setContentPane(root);
+	    window.setContentPane(p);
 	    window.pack();
 	    window.setLocationRelativeTo(null);
 	    window.setVisible(true);

@@ -17,9 +17,10 @@ import javax.swing.ImageIcon;
 public class Background {
 	private int width; // default is 500 px
 	protected ImageIcon image;
+	protected int scale;
 	
 	public Background(int width) {
-		ClassLoader cldr = this.getClass().getClassLoader();	// Load the background image from the classpath and scale it to the requested panel size.
+		ClassLoader cldr = this.getClass().getClassLoader();	// These five lines of code load the background picture.
 		String imagePath = "images/board_2048.png";				// Change this line if you want to use a different 
 		URL imageURL = cldr.getResource(imagePath);				// background image.  The image should be saved in the
 		this.width = width;
