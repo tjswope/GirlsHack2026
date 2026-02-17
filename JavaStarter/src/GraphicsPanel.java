@@ -72,7 +72,6 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	//				This is the only place that you can draw objects.
 	// parameters: Graphics g - This object is used to draw your images onto the graphics panel.
 	public void paintComponent(Graphics g){
-		Graphics2D g2 = (Graphics2D) g;
 		
 		// draws the background of the video game
 		background.draw(this, g);
