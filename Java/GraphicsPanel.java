@@ -308,7 +308,7 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		}
 		
 		// game over code
-		if (empty.isEmpty()) {
+		if (empty.isEmpty() && !movesLeft()) {
 			System.exit(0);
 		}
 		
@@ -320,6 +320,24 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		else value = 2;
 		// blocks height & width = 106 px, padding of 15 px.
 		board[add[0]][add[1]] = new Block(buffer + add[1] * (width + buffer), buffer + add[0] * (width + buffer), value, width);
+	}
+
+	// Method: movesLeft
+	// Description: checks each block to see if there is an adjacent block with identical value. If so, there is a 
+	//				valid move left and the method returns true. Otherwise, returns false.
+	// Parameters: N/A
+	// Return: boolean
+	public boolean movesLeft() {
+		boolean movesLeft = false;
+		for (int r = 0; r < board.length; r++) {
+			for (int c = 0; c < board[r].length; c++) {
+				if (r != 0 && board[r - 1][c] != null && board[r - 1][c].getValue() == board[r][c].getValue()) movesLeft = true;
+				if (r != 3 && board[r + 1][c] != null && board[r + 1][c].getValue() == board[r][c].getValue()) movesLeft = true;
+				if (c != 0 && board[r][c - 1] != null && board[r][c - 1].getValue() == board[r][c].getValue()) movesLeft = true;
+				if (c != 3 && board[r][c + 1] != null && board[r][c + 1].getValue() == board[r][c].getValue()) movesLeft = true;
+			}
+		}
+		return movesLeft;
 	}
 	
 	// method: keyPressed()
