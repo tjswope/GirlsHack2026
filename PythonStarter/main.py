@@ -342,12 +342,7 @@ def main(window):
                 direction = None
                 if event.key == pygame.K_LEFT:
                     direction = "left"
-                elif event.key == pygame.K_RIGHT:
-                    direction = "right"
-                elif event.key == pygame.K_UP:
-                    direction = "up"
-                elif event.key == pygame.K_DOWN:
-                    direction = "down"
+                #TODO: complete this for all 4 directions
 
                 if direction:
                     status, gained = move_tiles(window, tiles, clock, direction, score)
