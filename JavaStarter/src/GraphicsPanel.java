@@ -1,3 +1,4 @@
+
 // Class: GraphicsPanel
 // Written by: Mr. Swope
 // Date: 1/27/2020
@@ -85,9 +86,12 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		
 		
 		// draw all the blocks
-		// loop through double for loop, draw cBoard first (remember null pointer exception!!)
-		// (Block).draw(g2, this);
-		
+		for (int r = 0; r < board.length; r++) {
+			for (int c = 0; c < board[r].length; c++) { 
+				if (cBoard[r][c] != null) cBoard[r][c].draw(g, this); // draw combining blocks first
+				if (board[r][c] != null) board[r][c].draw(g, this);
+			}
+		}
 
 	}
 	
@@ -141,11 +145,17 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		
 		// if no block is moving
 		if (!isRunning) {
-			// stop the timer, add a block, set direction to [0,0], set all combined to false (double for loop)
+			// stop the timer, add a block, set direction to 0, set all combined to false
 			Timer.stop();
-			
+			addRandomBlock();
+			direction[0] = 0;
+			direction[1] = 0;
+			for (int r = 0; r < board.length; r++) {
+				for (int c = 0; c < board[r].length; c++) {
+					if (board[r][c] != null) board[r][c].setCombined(false);
+				}
+			}
 		}
-		
 		this.repaint();
 	}
 	
@@ -185,17 +195,98 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 				}
 			}
 		} else if (d == 2) { // down
-			// looping through rows 2, 1, & 0
-			// looks roughly identical to above code (d == 1)
+			for (int r = board.length - 2; r >= 0; r--) { // looping through rows 2, 1, & 0
+				for (int c = 0; c < board[r].length; c++) {
+					if (board[r][c] != null) {
+						int endRow = r;
+						
+						while (endRow + direction[0] < board.length && board[endRow + direction[0]][c] == null) {
+							endRow += direction[0]; // moves to empty spaces
+						}
+						
+						if (endRow + direction[0] < board.length 
+								&& board[endRow + direction[0]][c] != null 
+								&& board[endRow + direction[0]][c].getValue() == board[r][c].getValue() 
+								&& !board[endRow + direction[0]][c].getCombined()) { // collision
+							// collision
+							board[endRow + direction[0]][c].setCombined(true);
+							board[r][c].setMoving(true);
+							cBoard[endRow + direction[0]][c] = board[r][c]; // sets shadow block so that it can move
+							board[r][c] = null;
+						} else if (endRow != r) { // no collision
+							// block is moving
+							board[r][c].setMoving(true);
+							// block is at new position on array
+							board[endRow][c] = board[r][c];
+							// old position is empty
+							board[r][c] = null;
+						}
+					}
+				}
+			}
 		} else if (d == 3) { // left
-			// looping through columns 1, 2, & 3
-			// looks roughly identical to above code (d == 1)
+			for (int c = 1; c < board[0].length; c++) { // looping through columns 1, 2, & 3
+				for (int r = 0; r < board.length; r++) {
+					if (board[r][c] != null) {
+						int endCol = c;
+						
+						while (endCol + direction[1] >= 0 && board[r][endCol + direction[1]] == null) {
+							endCol += direction[1]; // moves to empty spaces
+						}
+						
+						if (endCol + direction[1] >= 0 
+								&& board[r][endCol + direction[1]] != null 
+								&& board[r][endCol + direction[1]].getValue() == board[r][c].getValue() 
+								&& !board[r][endCol + direction[1]].getCombined()) { // collision
+							// collision
+							board[r][endCol + direction[1]].setCombined(true);
+							board[r][c].setMoving(true);
+							cBoard[r][endCol + direction[1]] = board[r][c]; // sets shadow block so that it can move
+							board[r][c] = null;
+						} else if (endCol != c) { // no collision
+							// block is moving
+							board[r][c].setMoving(true);
+							// block is at new position on array
+							board[r][endCol] = board[r][c];
+							// old position is empty
+							board[r][c] = null;
+						}
+					}
+				}
+			}
 		} else if (d == 4) { // right
-			// looping through columns 2, 1, & 0
-			// looks roughly identical to above code (d == 1)
+			for (int c = board[1].length - 2; c >= 0; c--) { // looping through columns 2, 1, & 0
+				for (int r = 0; r < board.length; r++) {
+					if (board[r][c] != null) {
+						int endCol = c;
+						
+						while (endCol + direction[1] < board[c].length && board[r][endCol + direction[1]] == null) {
+							endCol += direction[1]; // moves to empty spaces
+						}
+						
+						if (endCol + direction[1] < board[r].length 
+								&& board[r][endCol + direction[1]] != null 
+								&& board[r][endCol + direction[1]].getValue() == board[r][c].getValue() 
+								&& !board[r][endCol + direction[1]].getCombined()) { // collision
+							// collision
+							board[r][endCol + direction[1]].setCombined(true);
+							board[r][c].setMoving(true);
+							cBoard[r][endCol + direction[1]] = board[r][c]; // sets shadow block so that it can move
+							board[r][c] = null;
+						} else if (endCol != c) { // no collision
+							// block is moving
+							board[r][c].setMoving(true);
+							// block is at new position on array
+							board[r][endCol] = board[r][c];
+							// old position is empty
+							board[r][c] = null;
+						}
+					}
+				}
+			}
 		}
 		
-		moves++; // optional, but fun!
+		moves++;
 	}
 	
 	// Method: addRandomBlock
@@ -209,8 +300,8 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		// adds empty spaces to ArrayList
 		
 		// game over code
-		// empty = the ArrayList
-		if (empty.isEmpty()) {
+		// empty = the ArrayList, no moves left
+		if (empty.isEmpty() && !movesLeft()) {
 			System.exit(0);
 		}
 		
@@ -221,6 +312,18 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		// blocks height & width = 106 px, padding of 15 px.
 		// add block to board
 		// new Block(buffer + column * (width + buffer), buffer + row * (width + buffer), value, width);
+	}
+	
+	// Method: movesLeft
+	// Description: checks each block to see if there is an adjacent block with identical value. If so, there is a 
+	//				valid move left and the method returns true. Otherwise, returns false.
+	// Parameters: N/A
+	// Return: boolean
+	public boolean movesLeft() {
+		// code here
+		// move through a double for loop and check to see if each block's adjacent blocks have the same value.
+		// if no block is next to a block with equal value, return false.
+		return true;
 	}
 	
 	// method: keyPressed()
