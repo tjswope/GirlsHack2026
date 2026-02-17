@@ -8,17 +8,12 @@
 // Edited by: Jacqueline, Valentina, Lucy, Ellie
 // Date: 01/30/2025
 // Description: Main class for the game, 2048. 
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -311,15 +306,16 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		if (empty.isEmpty() && !movesLeft()) {
 			System.exit(0);
 		}
-		
-		// select random block from empty list
-		int[] add = empty.get((int) (Math.random() * empty.size()));
-		// randomly select value of block: 2 = 90%, 4 = 10%
-		int value = 0;
-		if (Math.random() >= 0.9) value = 4;
-		else value = 2;
-		// blocks height & width = 106 px, padding of 15 px.
-		board[add[0]][add[1]] = new Block(buffer + add[1] * (width + buffer), buffer + add[0] * (width + buffer), value, width);
+		else if (!empty.isEmpty()){
+			// select random block from empty list
+			int[] add = empty.get((int) (Math.random() * empty.size()));
+			// randomly select value of block: 2 = 90%, 4 = 10%
+			int value = 0;
+			if (Math.random() >= 0.9) value = 4;
+			else value = 2;
+			// blocks height & width = 106 px, padding of 15 px.
+			board[add[0]][add[1]] = new Block(buffer + add[1] * (width + buffer), buffer + add[0] * (width + buffer), value, width);
+		}
 	}
 
 	// Method: movesLeft
@@ -331,10 +327,12 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		boolean movesLeft = false;
 		for (int r = 0; r < board.length; r++) {
 			for (int c = 0; c < board[r].length; c++) {
-				if (r != 0 && board[r - 1][c] != null && board[r - 1][c].getValue() == board[r][c].getValue()) movesLeft = true;
-				if (r != 3 && board[r + 1][c] != null && board[r + 1][c].getValue() == board[r][c].getValue()) movesLeft = true;
-				if (c != 0 && board[r][c - 1] != null && board[r][c - 1].getValue() == board[r][c].getValue()) movesLeft = true;
-				if (c != 3 && board[r][c + 1] != null && board[r][c + 1].getValue() == board[r][c].getValue()) movesLeft = true;
+				if (board[r][c] != null) {
+					if (r != 0 && (board[r - 1][c] == null || board[r - 1][c].getValue() == board[r][c].getValue())) movesLeft = true;
+					if (r != 3 && (board[r + 1][c] == null || board[r + 1][c].getValue() == board[r][c].getValue())) movesLeft = true;
+					if (c != 0 && (board[r][c - 1] == null || board[r][c - 1].getValue() == board[r][c].getValue())) movesLeft = true;
+					if (c != 3 && (board[r][c + 1] == null || board[r][c + 1].getValue() == board[r][c].getValue())) movesLeft = true;
+				}
 			}
 		}
 		return movesLeft;
@@ -348,7 +346,10 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	@Override public void keyPressed(KeyEvent e) {
 		int keyCode = e.getKeyCode();
 		// can only hit a key if the timer isn't running
-		if (keyCode == KeyEvent.VK_UP && !Timer.isRunning()) {
+		if (!movesLeft()) {
+			System.exit(0);
+		}
+		else if (keyCode == KeyEvent.VK_UP && !Timer.isRunning()) {
 			// set direction, call move, start timer.
         	direction[0] = -1;
 			move(1);
