@@ -304,14 +304,15 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 		if (empty.isEmpty() && !movesLeft()) {
 			System.exit(0);
 		}
-		
-		// select random block from empty list
-		
-		// randomly select value of block: 2 = 90%, 4 = 10%
-		
-		// blocks height & width = 106 px, padding of 15 px.
-		// add block to board
-		// new Block(buffer + column * (width + buffer), buffer + row * (width + buffer), value, width);
+		else if (empty.isEmpty()) {
+			// select random block from empty list
+			
+			// randomly select value of block: 2 = 90%, 4 = 10%
+			
+			// blocks height & width = 106 px, padding of 15 px.
+			// add block to board
+			// new Block(buffer + column * (width + buffer), buffer + row * (width + buffer), value, width);
+		}
 	}
 	
 	// Method: movesLeft
@@ -334,7 +335,10 @@ public class GraphicsPanel extends JPanel implements KeyListener{
 	@Override public void keyPressed(KeyEvent e) {
 		int keyCode = e.getKeyCode();
 		// can only hit a key if the timer isn't running
-		if (keyCode == KeyEvent.VK_UP && !Timer.isRunning()) {
+		if (!movesLeft()) {
+			System.exit(0);
+		}
+		else if (keyCode == KeyEvent.VK_UP && !Timer.isRunning()) {
 			// set direction, call move, start timer.
         	direction[0] = -1;
 			move(1);
